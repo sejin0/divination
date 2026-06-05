@@ -24,5 +24,9 @@ export type DivinationResult = {
   ai: {
     summary: string;
     result: string;
+    prefix: string;
+    advice: string;
+    suffix: string;
+    score: number;
   };
 };

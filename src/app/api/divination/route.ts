@@ -32,30 +32,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: `괘 데이터를 찾을 수 없습니다: ${code}` }, { status: 404 });
   }
 
-  const prompt = buildDivinationPrompt({
-    question: body.data.question,
-    category,
-    hexagram
-  });
+  const prompt = buildDivinationPrompt({ question: body.data.question, category, hexagram });
   const ai = await createDivinationInterpretation(prompt);
   const finalScore = hexagram.score;
   const rank = calculateRank(finalScore);
 
   const [questionRow] = await db
     .insert(questions)
-    .values({
-      question: body.data.question,
-      category
-    })
+    .values({ question: body.data.question, category })
     .returning({ id: questions.id });
 
-  const resultJson = {
-    code,
-    lines,
-    category,
-    finalScore,
-    rank
-  };
+  const resultJson = { code, lines, category, finalScore, rank };
 
   await db.insert(divinations).values({
     questionId: questionRow.id,
@@ -91,7 +78,11 @@ export async function POST(request: Request) {
     },
     ai: {
       summary: ai.summary,
-      result: ai.result
+      result: ai.result,
+      prefix: ai.prefix,
+      advice: ai.advice,
+      suffix: ai.suffix,
+      score: ai.score
     }
   });
 }

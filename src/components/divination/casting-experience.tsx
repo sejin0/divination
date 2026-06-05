@@ -1,6 +1,6 @@
 "use client";
 
-import { Sparkles, Info, RefreshCcw, BookMarked, UserCog, Volume2, VolumeX } from "lucide-react";
+import { BookOpen, Info, MessageCircle, RefreshCcw, Search, UserCog, Volume2, VolumeX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { categoryLabels } from "@/lib/divination/categories";
 import type { DivinationResult, HexLine } from "@/lib/divination/types";
@@ -8,7 +8,10 @@ import { HexLineView } from "./hex-line";
 
 type ViewState = "profile" | "intro" | "casting" | "result";
 
-const YEAR_STEM_ELEMENTS: Record<string, { type: string; name: string; icon: string; colorClass: string; bgClass: string; borderClass: string; desc: string }> = {
+const YEAR_STEM_ELEMENTS: Record<
+  string,
+  { type: string; name: string; icon: string; colorClass: string; bgClass: string; borderClass: string; desc: string }
+> = {
   "4": { type: "wood",  name: "목(木)", icon: "🌳", colorClass: "text-emerald-600", bgClass: "bg-emerald-100", borderClass: "border-emerald-200", desc: "하늘로 뻗어가는 큰 나무의 강직한 기운" },
   "5": { type: "wood",  name: "목(木)", icon: "🌿", colorClass: "text-emerald-500", bgClass: "bg-emerald-50",  borderClass: "border-emerald-100", desc: "바람에 유연한 화초와 넝쿨의 기운" },
   "6": { type: "fire",  name: "화(火)", icon: "☀️", colorClass: "text-rose-600",    bgClass: "bg-rose-100",    borderClass: "border-rose-200",    desc: "만물을 비추는 크고 밝은 태양의 기운" },
@@ -36,16 +39,19 @@ function Modal({ message, onClose }: { message: string; onClose: () => void }) {
           <h3 className="text-lg font-bold text-slate-900">알림</h3>
         </div>
         <p className="text-slate-600 text-sm leading-relaxed mb-6 whitespace-pre-wrap">{message}</p>
-        <button
-          type="button"
-          onClick={onClose}
-          className="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-xl font-medium transition-colors"
-        >
+        <button type="button" onClick={onClose} className="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-xl font-medium transition-colors">
           확인
         </button>
       </div>
     </div>
   );
+}
+
+/* ── 점수 색상 ───────────────────────────────── */
+function scoreBarColor(score: number) {
+  if (score >= 80) return "bg-emerald-500";
+  if (score >= 50) return "bg-amber-400";
+  return "bg-rose-500";
 }
 
 export function CastingExperience() {
@@ -56,7 +62,7 @@ export function CastingExperience() {
   const [modalMessage, setModalMessage] = useState("");
   const [isMuted, setIsMuted] = useState(false);
   const [selectedGender, setSelectedGender] = useState<"M" | "F">("M");
-  const [profile, setProfile] = useState<{ name: string; element: typeof YEAR_STEM_ELEMENTS[string] } | null>(null);
+  const [profile, setProfile] = useState<{ name: string; element: (typeof YEAR_STEM_ELEMENTS)[string] } | null>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   /* 저장된 프로필 복원 */
@@ -68,9 +74,7 @@ export function CastingExperience() {
         setProfile(p);
         setView("intro");
       }
-    } catch {
-      // ignore
-    }
+    } catch { /* ignore */ }
   }, []);
 
   /* 프로필 저장 */
@@ -134,40 +138,23 @@ export function CastingExperience() {
     setView("intro");
   }
 
-  /* ── 상단 네비게이션 바 ──────────────────────── */
-  const showNav = view === "result";
+  /* ── 상단 네비게이션 ─────────────────────────── */
   const Nav = (
     <div className="absolute top-0 w-full flex justify-between items-center p-6 z-50 pointer-events-none">
-      {/* 좌측: 홈 버튼 (결과 화면에서만) */}
       <div className="pointer-events-auto">
-        {showNav && (
-          <button
-            type="button"
-            onClick={resetToIntro}
-            className="flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors"
-          >
+        {view === "result" && (
+          <button type="button" onClick={resetToIntro} className="flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors">
             <div className="w-8 h-8 bg-slate-900 text-amber-50 rounded-full flex items-center justify-center text-sm border-2 border-amber-600/30 font-serif">周</div>
           </button>
         )}
       </div>
-      {/* 우측: 사주수정 + 뮤트 */}
       <div className="flex items-center gap-2 pointer-events-auto">
         {view !== "profile" && profile && (
-          <button
-            type="button"
-            onClick={() => setView("profile")}
-            className="p-2 rounded-full bg-white/50 hover:bg-white text-slate-600 transition-all shadow-sm backdrop-blur-sm border border-white/50"
-            title="사주 정보 수정"
-          >
+          <button type="button" onClick={() => setView("profile")} className="p-2 rounded-full bg-white/50 hover:bg-white text-slate-600 transition-all shadow-sm backdrop-blur-sm border border-white/50" title="사주 정보 수정">
             <UserCog className="w-5 h-5" />
           </button>
         )}
-        <button
-          type="button"
-          onClick={() => setIsMuted((m) => !m)}
-          className="p-2 rounded-full bg-white/50 hover:bg-white text-slate-600 transition-all shadow-sm backdrop-blur-sm border border-white/50"
-          title={isMuted ? "소리 켜기" : "소리 끄기"}
-        >
+        <button type="button" onClick={() => setIsMuted((m) => !m)} className="p-2 rounded-full bg-white/50 hover:bg-white text-slate-600 transition-all shadow-sm backdrop-blur-sm border border-white/50">
           {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
         </button>
       </div>
@@ -179,40 +166,25 @@ export function CastingExperience() {
     return (
       <>
         {Nav}
-        <Modal message={modalMessage} onClose={() => { setModalMessage(""); }} />
+        <Modal message={modalMessage} onClose={() => setModalMessage("")} />
         <section className="w-full animate-fade-in-bottom">
           <div className="bg-white p-8 rounded-2xl shadow-xl shadow-slate-200/50 w-full border border-slate-100">
             <div className="text-center mb-6">
               <h2 className="text-xl font-bold text-slate-900">운명(運命)의 기운</h2>
-              <p className="text-xs text-slate-500 mt-2">
-                정확한 주역 괘 해석을 위해<br />태어난 생년월일과 성별을 알려주세요.
-              </p>
+              <p className="text-xs text-slate-500 mt-2">정확한 주역 괘 해석을 위해<br />태어난 생년월일과 성별을 알려주세요.</p>
             </div>
             <form onSubmit={handleSaveProfile} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">이름 (선택)</label>
-                <input
-                  type="text"
-                  name="profile-name"
-                  defaultValue={profile?.name ?? ""}
-                  placeholder="홍길동"
-                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
-                />
+                <input type="text" name="profile-name" defaultValue={profile?.name ?? ""} placeholder="홍길동"
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500" />
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">성별</label>
                 <div className="flex gap-3">
                   {(["M", "F"] as const).map((g) => (
-                    <button
-                      key={g}
-                      type="button"
-                      onClick={() => setSelectedGender(g)}
-                      className={`flex-1 py-3 border rounded-xl text-sm transition-colors ${
-                        selectedGender === g
-                          ? "bg-amber-100 border-amber-400 text-amber-800 font-bold"
-                          : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
-                      }`}
-                    >
+                    <button key={g} type="button" onClick={() => setSelectedGender(g)}
+                      className={`flex-1 py-3 border rounded-xl text-sm transition-colors ${selectedGender === g ? "bg-amber-100 border-amber-400 text-amber-800 font-bold" : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"}`}>
                       {g === "M" ? "남성(乾)" : "여성(坤)"}
                     </button>
                   ))}
@@ -220,16 +192,10 @@ export function CastingExperience() {
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">생년월일</label>
-                <input
-                  type="date"
-                  name="profile-date"
-                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 cursor-pointer"
-                />
+                <input type="date" name="profile-date"
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 cursor-pointer" />
               </div>
-              <button
-                type="submit"
-                className="w-full mt-4 bg-slate-900 hover:bg-slate-800 text-white font-medium py-3.5 rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-slate-900/20"
-              >
+              <button type="submit" className="w-full mt-4 bg-slate-900 hover:bg-slate-800 text-white font-medium py-3.5 rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-slate-900/20">
                 오행 기운 분석하기
               </button>
             </form>
@@ -244,16 +210,13 @@ export function CastingExperience() {
     return (
       <>
         {Nav}
-        <Modal message={modalMessage} onClose={() => { setModalMessage(""); }} />
+        <Modal message={modalMessage} onClose={() => setModalMessage("")} />
         <section className="w-full animate-fade-in-bottom flex flex-col items-center">
-          {/* 오행 뱃지 */}
           {profile?.element && (
             <div className={`mb-6 px-4 py-2 rounded-full shadow-sm border flex items-center gap-2 animate-fade-in-bottom ${profile.element.bgClass} ${profile.element.borderClass}`}>
               <span className="text-xs text-slate-500">나의 기운:</span>
               <span className="text-sm">{profile.element.icon}</span>
-              <span className={`text-xs font-bold ${profile.element.colorClass}`}>
-                {profile.element.name} — {profile.element.desc}
-              </span>
+              <span className={`text-xs font-bold ${profile.element.colorClass}`}>{profile.element.name} — {profile.element.desc}</span>
             </div>
           )}
           <div className="bg-white p-8 rounded-2xl shadow-xl shadow-slate-200/50 w-full border border-slate-100">
@@ -261,19 +224,12 @@ export function CastingExperience() {
               {profile?.name ? `${profile.name}님, 무엇이 궁금하신가요?` : "무엇이 궁금하신가요?"}<br />
               <span className="text-xs text-slate-400 font-normal">질문을 구체적으로 적을수록 답변이 명확해집니다.</span>
             </label>
-            <textarea
-              id="question-input"
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
+            <textarea id="question-input" value={question} onChange={(e) => setQuestion(e.target.value)}
               className="w-full h-32 p-4 bg-slate-50 rounded-xl border border-slate-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 focus:outline-none resize-none transition-all text-center text-sm placeholder:text-slate-300"
-              placeholder={"예: 이번 프로젝트가 잘 될까요?\n예: 그 사람과 다시 만날 수 있을까요?"}
-            />
-            <button
-              type="button"
-              onClick={startCasting}
-              className="group w-full mt-6 bg-slate-900 hover:bg-slate-800 text-white font-medium py-4 rounded-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg shadow-slate-900/20"
-            >
-              <Sparkles className="w-[18px] h-[18px] text-amber-400 group-hover:rotate-12 transition-transform" />
+              placeholder={"예: 이번 프로젝트가 잘 될까요?\n예: 그 사람과 다시 만날 수 있을까요?"} />
+            <button type="button" onClick={startCasting}
+              className="group w-full mt-6 bg-slate-900 hover:bg-slate-800 text-white font-medium py-4 rounded-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg shadow-slate-900/20">
+              <span className="text-amber-400 text-lg">✦</span>
               점치기 시작
             </button>
           </div>
@@ -292,9 +248,7 @@ export function CastingExperience() {
       if (j >= lines.length) {
         castingRows.push(<div key={`empty-${j}`} className="h-4 w-full max-w-[200px] bg-transparent opacity-0" />);
       } else {
-        castingRows.push(
-          <HexLineView key={`line-${j}-${lines[j]}`} value={lines[j]} animate={j === lines.length - 1} />
-        );
+        castingRows.push(<HexLineView key={`line-${j}-${lines[j]}`} value={lines[j]} animate={j === lines.length - 1} />);
       }
     }
     return (
@@ -316,13 +270,17 @@ export function CastingExperience() {
   /* ── Result View ─────────────────────────────── */
   if (view === "result" && result) {
     const resultLines = [...result.lines].reverse();
+    const score = result.ai.score ?? result.finalScore;
+    const displayScore = typeof score === "number" && score > 0 ? score : result.finalScore;
+
     return (
       <>
         {Nav}
         <Modal message={modalMessage} onClose={() => setModalMessage("")} />
         <section className="w-full animate-zoom-in pb-10">
           <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-2xl shadow-slate-200/50 relative">
-            {/* 헤더: 배경 이미지 + gradient overlay */}
+
+            {/* ─ 헤더: 어두운 배경 + 괘 심볼 ─ */}
             <div className="relative w-full min-h-[26rem] flex flex-col overflow-hidden bg-slate-900 rounded-t-2xl pb-16">
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-slate-900/20" />
               <div className="relative z-10 w-full h-full flex flex-col pt-6 px-6">
@@ -330,7 +288,7 @@ export function CastingExperience() {
                 <div className="w-full flex justify-end mb-6">
                   <div className="flex flex-col items-end gap-1">
                     <div className="bg-amber-400/90 text-slate-900 text-xs font-bold px-3 py-1 rounded-full backdrop-blur-sm shadow-lg flex items-center gap-1">
-                      <span>{categoryLabels[result.category]} 기준</span>
+                      <span>🏆 {categoryLabels[result.category]} 기준</span>
                     </div>
                     <div className="bg-slate-800/80 text-white text-xs px-3 py-1 rounded-full backdrop-blur-sm shadow-lg border border-slate-700">
                       전체 64괘 중 <span className="text-amber-400 font-bold text-sm">상위 {result.rank}위</span>
@@ -350,28 +308,79 @@ export function CastingExperience() {
               </div>
             </div>
 
-            {/* 본문 */}
-            <div className="space-y-5 p-6">
-              <div>
-                <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">질문</p>
-                <p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-700">{question}</p>
+            {/* ─ 본문 ─ */}
+            <div className="p-6 space-y-6">
+
+              {/* 질문 요약 + 점수 바 */}
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                <h3 className="flex items-center text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                  <Search className="w-3 h-3 mr-1.5" /> 질문 요약
+                </h3>
+                <p className="text-slate-700 italic text-sm mb-3">&ldquo;{question}&rdquo;</p>
+                <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-1000 ease-out ${scoreBarColor(displayScore)}`}
+                    style={{ width: `${displayScore}%` }}
+                  />
+                </div>
+                <div className="flex justify-between items-center mt-1.5">
+                  <span className="text-[10px] text-slate-400">주의</span>
+                  <span className="text-[11px] font-bold text-slate-600">운세 지수 <span className="text-amber-600">{displayScore}점</span></span>
+                  <span className="text-[10px] text-slate-400">대길</span>
+                </div>
               </div>
+
+              {/* 괘의 형상 */}
               <div>
-                <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">괘의 의미</p>
-                <p className="text-sm leading-7 text-slate-700">{result.hexagram.meaning}</p>
+                <h3 className="flex items-center text-sm font-bold text-slate-900 mb-2">
+                  <BookOpen className="w-4 h-4 mr-2 text-amber-600" /> 괘의 형상(卦象)
+                </h3>
+                <p className="text-slate-600 leading-relaxed text-sm">{result.hexagram.meaning}</p>
               </div>
-              <div>
-                <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">AI 상담</p>
-                <p className="whitespace-pre-wrap text-sm leading-7 text-slate-700">{result.ai.result}</p>
+
+              {/* 상세 풀이 */}
+              <div className="relative">
+                <div className="absolute left-3 top-8 bottom-4 w-0.5 bg-amber-200" />
+                <h3 className="flex items-center text-sm font-bold text-slate-900 mb-2">
+                  <MessageCircle className="w-4 h-4 mr-2 text-amber-600" /> 상세 풀이
+                </h3>
+                <div className="pl-4 space-y-2">
+                  {/* prefix — 상황 분석 */}
+                  {result.ai.prefix && (
+                    <p className="text-slate-800 text-sm leading-relaxed text-justify font-medium">
+                      {result.ai.prefix}
+                    </p>
+                  )}
+                  {/* advice — 주역 해석 본문 */}
+                  {result.ai.advice && (
+                    <p className="text-slate-600 text-sm leading-relaxed text-justify">
+                      {result.ai.advice}
+                    </p>
+                  )}
+                  {/* suffix — 실천 조언 강조 박스 */}
+                  {result.ai.suffix && (
+                    <div className="bg-amber-50 p-3 rounded-lg border border-amber-100 mt-3 shadow-sm">
+                      <p className="text-slate-800 text-sm leading-relaxed text-justify">
+                        <span className="text-amber-600 font-bold mr-1">💡 실천 조언:</span>
+                        {result.ai.suffix}
+                      </p>
+                    </div>
+                  )}
+                  {/* fallback: 구조화 응답 없을 때 result 전체 표시 */}
+                  {!result.ai.prefix && !result.ai.advice && !result.ai.suffix && result.ai.result && (
+                    <p className="text-slate-600 text-sm leading-relaxed whitespace-pre-wrap">{result.ai.result}</p>
+                  )}
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={resetToIntro}
-                className="w-full rounded-xl bg-slate-900 py-3.5 text-sm font-medium text-white shadow-lg shadow-slate-900/20 transition active:scale-[0.98] flex items-center justify-center gap-2 hover:bg-slate-800"
-              >
-                <RefreshCcw className="w-4 h-4" />
-                새로운 질문하기
-              </button>
+
+              {/* 새 질문 버튼 */}
+              <div className="pt-2 border-t border-slate-100">
+                <button type="button" onClick={resetToIntro}
+                  className="w-full rounded-xl bg-slate-900 py-3.5 text-sm font-medium text-white shadow-lg shadow-slate-900/20 transition active:scale-[0.98] flex items-center justify-center gap-2 hover:bg-slate-800">
+                  <RefreshCcw className="w-4 h-4" />
+                  새로운 질문하기
+                </button>
+              </div>
             </div>
           </div>
         </section>
