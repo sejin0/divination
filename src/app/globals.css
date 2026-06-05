@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes fade-in-bottom {
+  0% {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-top {
+  0% {
+    opacity: 0;
+    transform: translateY(-1rem);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes zoom-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in-bottom {
+  animation: fade-in-bottom 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-in-top {
+  animation: fade-in-top 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-zoom-in {
+  animation: zoom-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.hex-line-init {
+  opacity: 0;
+  transform: translateY(1rem);
+  transition: all 0.7s ease;
+}
+
+.hex-line-enter {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+body {
+  background: #fdfbf7;
+}

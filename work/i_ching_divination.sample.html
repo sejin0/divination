@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>주역점 (I Ching Divination) - 음양오행 맞춤 주역 운세</title>
+  <meta name="description" content="사주명리 음양오행과 주역(周易) 64괘를 융합하여 당신의 선천적 기운에 꼭 맞는 깊이 있는 맞춤형 운세와 고민 상담을 제공합니다.">
+  <meta name="keywords" content="주역, 주역점, 점, 운세, 사주, 음양오행, 타로, 오늘의운세, 무료운세, 고민상담, 사주팔자, 토정비결">
+  <meta name="author" content="주역점 AI">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "음양오행 주역점",
+    "description": "사용자의 사주 정보(음양오행)와 주역 64괘를 크로스 분석하여 초개인화된 맞춤형 운세 풀이와 실천 조언을 제공합니다.",
+    "applicationCategory": "LifestyleApplication",
+    "operatingSystem": "WebBrowser",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
+  }
+  </script>
+  
+  <!-- Tailwind CSS & Lucide Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    @keyframes fade-in-bottom { 0% { opacity: 0; transform: translateY(1rem); } 100% { opacity: 1; transform: translateY(0); } }
+    @keyframes fade-in-top { 0% { opacity: 0; transform: translateY(-1rem); } 100% { opacity: 1; transform: translateY(0); } }
+    @keyframes zoom-in { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
+    @keyframes bounce-in-custom {
+      0% { transform: translateY(100px) translateX(-50%) scale(0.8); opacity: 0; }
+      60% { transform: translateY(0px) translateX(-50%) scale(1.05); opacity: 1; }
+      100% { transform: translateY(16px) translateX(-50%) scale(1); opacity: 1; }
+    }
+
+    .animate-fade-in-bottom { animation: fade-in-bottom 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .animate-fade-in-top { animation: fade-in-top 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .animate-zoom-in { animation: zoom-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .animate-bounce-in-custom { animation: bounce-in-custom 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+    .hex-line-init { opacity: 0; transform: translateY(1rem); transition: all 0.7s ease; }
+    .hex-line-enter { opacity: 1; transform: translateY(0); }
+    
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
+</head>
+<body class="bg-[#FDFBF7] text-slate-800 font-sans selection:bg-amber-100 flex flex-col items-center relative overflow-x-hidden min-h-screen m-0 py-10">
+
+  <!-- 커스텀 모달 (에러/알림창) -->
+  <div id="custom-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-slate-900/40 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+    <div id="custom-modal-content" class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full mx-4 transform scale-95 transition-transform duration-300">
+      <div class="flex items-center gap-3 mb-4">
+        <i data-lucide="info" class="w-6 h-6 text-amber-500"></i>
+        <h3 class="text-lg font-bold text-slate-900">알림</h3>
+      </div>
+      <p id="custom-modal-text" class="text-slate-600 text-sm leading-relaxed mb-6 whitespace-pre-wrap"></p>
+      <button id="custom-modal-close" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-xl font-medium transition-colors">확인</button>
+    </div>
+  </div>
+
+  <!-- 배경 장식 -->
+  <div class="fixed top-0 left-0 w-full h-full opacity-5 pointer-events-none overflow-hidden z-0">
+    <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-amber-400 blur-[100px]"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-slate-400 blur-[120px]"></div>
+  </div>
+
+  <!-- 헤더 (로고, 유저 컨트롤) -->
+  <div class="absolute top-0 w-full flex justify-between items-center p-6 z-50 pointer-events-none">
+    <div class="pointer-events-auto" id="nav-logo-container">
+      <button id="btn-reset-nav" class="hidden items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors">
+        <div class="w-8 h-8 bg-slate-900 text-amber-50 rounded-full flex items-center justify-center text-sm border-2 border-amber-600/30 font-serif">周</div>
+      </button>
+    </div>
+
+    <div class="flex items-center gap-2 sm:gap-3 pointer-events-auto">
+      <button id="btn-edit-profile" class="hidden p-2 rounded-full bg-white/50 hover:bg-white text-slate-600 transition-all shadow-sm backdrop-blur-sm border border-white/50" title="사주 정보 수정">
+        <i data-lucide="user-cog" class="w-5 h-5"></i>
+      </button>
+      <button id="btn-history" class="hidden p-2 rounded-full bg-white/50 hover:bg-white text-slate-600 transition-all shadow-sm backdrop-blur-sm border border-white/50" title="나의 기록">
+        <i data-lucide="book-marked" class="w-5 h-5"></i>
+      </button>
+      <div id="user-controls-container"></div>
+      <button id="btn-mute" class="p-2 rounded-full bg-white/50 hover:bg-white text-slate-600 transition-all shadow-sm backdrop-blur-sm border border-white/50" title="소리 끄기">
+        <i data-lucide="volume-2" class="w-5 h-5"></i>
+      </button>
+    </div>
+  </div>
+
+  <main class="w-full max-w-md p-8 relative z-10 flex flex-col items-center min-h-[600px] mt-12">
+    
+    <header id="main-header" class="mb-8 text-center animate-fade-in-top">
+      <div class="w-16 h-16 bg-slate-900 text-amber-50 rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl border-4 border-amber-600/30">
+        <span class="text-3xl font-serif">周</span>
+      </div>
+      <h1 class="text-3xl font-bold text-slate-900 mb-2 tracking-tight">주역(周易)</h1>
+      <p class="text-slate-500 text-sm tracking-widest">음양오행의 이치를 묻다</p>
+    </header>
+
+    <!-- 0. Profile Setup View -->
+    <div id="view-profile" class="w-full flex flex-col items-center animate-fade-in-bottom hidden">
+      <div class="bg-white p-8 rounded-2xl shadow-xl shadow-slate-200/50 w-full border border-slate-100">
+        <div class="text-center mb-6">
+          <h2 class="text-xl font-bold text-slate-900">운명(運命)의 기운</h2>
+          <p class="text-xs text-slate-500 mt-2">정확한 주역 괘 해석을 위해<br/>태어난 생년월일과 성별을 알려주세요.</p>
+        </div>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">이름 (선택)</label>
+            <input type="text" id="profile-name" placeholder="홍길동" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500">
+          </div>
+          
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">성별</label>
+            <div class="flex gap-3">
+              <button type="button" class="gender-btn flex-1 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-600 hover:bg-slate-100 transition-colors" data-value="M">남성(乾)</button>
+              <button type="button" class="gender-btn flex-1 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-600 hover:bg-slate-100 transition-colors" data-value="F">여성(坤)</button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">생년월일</label>
+            <input type="date" id="profile-date" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 cursor-pointer">
+          </div>
+        </div>
+
+        <button id="btn-save-profile" class="w-full mt-8 bg-slate-900 hover:bg-slate-800 text-white font-medium py-3.5 rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-slate-900/20">
+          오행 기운 분석하기
+        </button>
+      </div>
+    </div>
+
+    <!-- 1. Intro View -->
+    <div id="view-intro" class="w-full flex flex-col items-center animate-fade-in-bottom hidden">
+      <!-- 유저 오행 뱃지 표시 영역 -->
+      <div id="user-ohhaeng-badge" class="mb-6 px-4 py-2 bg-white rounded-full shadow-sm border border-slate-100 flex items-center gap-2 hidden">
+        <span class="text-xs text-slate-500">나의 기운:</span>
+        <span id="badge-element-icon" class="text-sm"></span>
+        <span id="badge-element-text" class="text-xs font-bold"></span>
+      </div>
+
+      <div class="bg-white p-8 rounded-2xl shadow-xl shadow-slate-200/50 w-full border border-slate-100">
+        <label id="intro-label" class="block text-slate-600 text-sm font-medium mb-3 text-center">
+          무엇이 궁금하신가요?<br/>
+          <span class="text-xs text-slate-400 font-normal">질문을 구체적으로 적을수록 답변이 명확해집니다.</span>
+        </label>
+        <textarea id="question-input" class="w-full h-32 p-4 bg-slate-50 rounded-xl border border-slate-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 focus:outline-none resize-none transition-all text-center placeholder:text-slate-300" placeholder="예: 이번 프로젝트가 잘 될까요?&#10;예: 그 사람과 다시 만날 수 있을까요?"></textarea>
+        <button id="btn-start" class="w-full mt-6 bg-slate-900 hover:bg-slate-800 text-white font-medium py-4 rounded-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 group shadow-lg shadow-slate-900/20">
+          <i data-lucide="sparkles" class="w-[18px] h-[18px] text-amber-400 group-hover:rotate-12 transition-transform"></i>
+          점치기 시작
+        </button>
+      </div>
+      <p class="mt-8 text-xs text-slate-400 text-center leading-relaxed">
+        주역은 점치는 이의 마음가짐에 감응합니다.<br/>진지한 태도로 임해주십시오.
+      </p>
+    </div>
+
+    <!-- 2. Casting View -->
+    <div id="view-casting" class="w-full flex-col items-center justify-center flex-1 hidden">
+      <div class="text-center mb-8 animate-pulse">
+        <h2 class="text-xl font-medium text-slate-700">천지기운(天地氣運)</h2>
+        <p id="casting-subtitle" class="text-sm text-slate-400 mt-2">우주의 기운과 교감하고 있습니다...</p>
+      </div>
+      <div id="casting-lines-container" class="flex flex-col items-center justify-center min-h-[250px] w-full bg-white/50 rounded-2xl p-8 border border-slate-100 shadow-inner gap-3">
+      </div>
+    </div>
+
+    <!-- 3. Result View -->
+    <div id="view-result" class="w-full pb-10 hidden animate-zoom-in">
+      <div class="bg-white rounded-2xl shadow-2xl shadow-slate-200/50 overflow-visible border border-slate-100 relative">
+        
+        <div class="relative w-full min-h-[26rem] flex flex-col overflow-hidden bg-slate-900 rounded-t-2xl pb-16">
+          <img id="result-bg-image" src="" alt="Background" class="absolute inset-0 w-full h-full object-cover opacity-60 hidden" />
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-slate-900/20"></div>
+          
+          <div class="relative z-10 w-full h-full flex flex-col pt-6 px-6">
+            <div class="w-full flex justify-end mb-6">
+              <div class="flex flex-col items-end gap-1">
+                <div class="bg-amber-400/90 text-slate-900 text-xs font-bold px-3 py-1 rounded-full backdrop-blur-sm shadow-lg flex items-center gap-1">
+                  <i data-lucide="award" class="w-3 h-3"></i>
+                  <span id="result-category-label">기준</span>
+                </div>
+                <div class="bg-slate-800/80 text-white text-xs px-3 py-1 rounded-full backdrop-blur-sm shadow-lg border border-slate-700">
+                  전체 64괘 중 <span id="result-rank" class="text-amber-400 font-bold text-sm">상위 0위</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex-1 flex flex-col items-center justify-center pb-8">
+              <div id="result-hexagram-container" class="flex flex-col w-[90px] mb-6 filter drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] gap-2">
+              </div>
+              <h2 id="result-name-kor" class="text-4xl font-bold text-white mb-2 shadow-black drop-shadow-md"></h2>
+              <span id="result-name-han" class="text-amber-200 font-serif text-2xl shadow-black drop-shadow-md"></span>
+            </div>
+          </div>
+          
+          <div id="hodori-container" class="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-6 z-20"></div>
+        </div>
+
+        <div class="p-6 pt-16">
+          
+          <!-- 음양오행 분석 섹션 -->
+          <div id="ohhaeng-analysis-section" class="mb-6 bg-white p-5 rounded-xl border-2 border-slate-100 shadow-sm relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-slate-100 to-transparent rounded-bl-full opacity-50"></div>
+            <h3 class="flex items-center text-sm font-bold text-slate-900 mb-4 relative z-10">
+              <i data-lucide="orbit" class="w-4 h-4 mr-2 text-indigo-500"></i> 음양오행(陰陽五行) 심층 분석
+            </h3>
+            <div class="flex items-center justify-between bg-slate-50 rounded-lg p-3 mb-4 border border-slate-100">
+              <div class="text-center flex-1">
+                <span class="text-[10px] text-slate-400 block mb-1">나의 기운</span>
+                <span id="analysis-user-element" class="text-sm font-bold block"></span>
+              </div>
+              <div class="text-slate-300 px-2"><i data-lucide="arrow-right-left" class="w-4 h-4"></i></div>
+              <div class="text-center flex-1">
+                <span class="text-[10px] text-slate-400 block mb-1">점괘의 기운</span>
+                <span id="analysis-hex-element" class="text-sm font-bold block"></span>
+              </div>
+            </div>
+            <p id="analysis-relation-desc" class="text-slate-700 text-[13px] leading-relaxed relative z-10 text-justify bg-indigo-50/50 p-3 rounded-lg border border-indigo-50"></p>
+          </div>
+
+          <!-- 질문 분석 바 -->
+          <div class="mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100 mt-4">
+            <h3 class="flex items-center text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+              <i data-lucide="search" class="w-3 h-3 mr-1.5"></i> 질문 요약
+            </h3>
+            <p id="result-question" class="text-slate-700 italic text-sm mb-3"></p>
+            
+            <div class="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden flex">
+              <div id="result-score-bar" class="h-full rounded-full transition-all duration-1000 ease-out w-0"></div>
+            </div>
+            <div class="flex justify-between items-center mt-1.5">
+              <span class="text-[10px] text-slate-400">주의</span>
+              <span class="text-[11px] font-bold text-slate-600">운세 지수 <span id="result-score-text" class="text-amber-600">0점</span></span>
+              <span class="text-[10px] text-slate-400">대길</span>
+            </div>
+          </div>
+
+          <div class="space-y-6">
+            <div>
+              <h3 class="flex items-center text-sm font-bold text-slate-900 mb-2">
+                <i data-lucide="book-open" class="w-4 h-4 mr-2 text-amber-600"></i> 괘의 형상(卦象)
+              </h3>
+              <p id="result-meaning" class="text-slate-600 leading-relaxed text-sm"></p>
+            </div>
+            
+            <div class="relative">
+              <div class="absolute left-3 top-8 bottom-4 w-0.5 bg-amber-200"></div>
+              <h3 class="flex items-center text-sm font-bold text-slate-900 mb-2">
+                <i data-lucide="message-circle" class="w-4 h-4 mr-2 text-amber-600"></i> 상세 풀이
+              </h3>
+              <div class="pl-4">
+                <p id="result-prefix" class="text-slate-800 text-sm leading-relaxed text-justify mb-2 font-medium"></p>
+                <p id="result-advice" class="text-slate-600 text-sm leading-relaxed text-justify mb-2"></p>
+                <p class="text-slate-800 text-sm leading-relaxed text-justify font-medium bg-amber-50 p-3 rounded-lg border border-amber-100 mt-3 shadow-sm">
+                  <span class="text-amber-600 font-bold mr-1">💡 실천 조언:</span>
+                  <span id="result-suffix"></span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-8 pt-6 border-t border-slate-100">
+            <button id="btn-reset" class="w-full py-3.5 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-all flex items-center justify-center gap-2 text-sm font-medium shadow-lg shadow-slate-900/10 active:scale-[0.98]">
+              <i data-lucide="refresh-ccw" class="w-4 h-4"></i> 새로운 질문하기
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. History View -->
+    <div id="view-history" class="w-full pb-10 mt-10 hidden animate-fade-in-bottom">
+      <div class="bg-white p-6 rounded-2xl shadow-xl shadow-slate-200/50 w-full border border-slate-100 min-h-[400px] relative">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+            <i data-lucide="book-marked" class="text-amber-600 w-5 h-5"></i> 나의 점괘 기록
+          </h2>
+          <button id="btn-close-history" class="p-2 text-slate-400 hover:text-slate-800 transition-colors bg-slate-100 hover:bg-slate-200 rounded-full">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+        <div id="history-list" class="space-y-3 max-h-[450px] overflow-y-auto pr-2"></div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    /* =========================================================================
+       1. 사주명리 음양오행 및 주역 데이터베이스
+       ========================================================================= */
+    const YEAR_STEM_ELEMENTS = {
+      '4': { type: 'wood',  name: '목(木)', label: '갑(甲)', icon: '🌳', color: 'text-emerald-600', bg: 'bg-emerald-100', border: 'border-emerald-200', desc: '하늘로 뻗어가는 큰 나무의 강직한 기운' },
+      '5': { type: 'wood',  name: '목(木)', label: '을(乙)', icon: '🌿', color: 'text-emerald-500', bg: 'bg-emerald-50',  border: 'border-emerald-100', desc: '바람에 유연한 화초와 넝쿨의 기운' },
+      '6': { type: 'fire',  name: '화(火)', label: '병(丙)', icon: '☀️', color: 'text-rose-600',    bg: 'bg-rose-100',    border: 'border-rose-200',    desc: '만물을 비추는 크고 밝은 태양의 기운' },
+      '7': { type: 'fire',  name: '화(火)', label: '정(丁)', icon: '🕯️', color: 'text-rose-500',    bg: 'bg-rose-50',     border: 'border-rose-100',    desc: '어둠을 밝히는 은은한 촛불의 기운' },
+      '8': { type: 'earth', name: '토(土)', label: '무(戊)', icon: '⛰️', color: 'text-amber-700',   bg: 'bg-amber-100',   border: 'border-amber-200',   desc: '만물을 묵묵히 품는 거대한 태산의 기운' },
+      '9': { type: 'earth', name: '토(土)', label: '기(己)', icon: '🌱', color: 'text-amber-600',   bg: 'bg-amber-50',    border: 'border-amber-100',   desc: '생명을 길러내는 비옥한 평야의 기운' },
+      '0': { type: 'metal', name: '금(金)', label: '경(庚)', icon: '🪨', color: 'text-slate-600',   bg: 'bg-slate-200',   border: 'border-slate-300',   desc: '예리하게 벼려진 강철과 바위의 기운' },
+      '1': { type: 'metal', name: '금(金)', label: '신(辛)', icon: '💎', color: 'text-slate-500',   bg: 'bg-slate-100',   border: 'border-slate-200',   desc: '섬세하고 아름답게 세공된 보석의 기운' },
+      '2': { type: 'water', name: '수(水)', label: '임(壬)', icon: '🌊', color: 'text-blue-600',    bg: 'bg-blue-100',    border: 'border-blue-200',    desc: '모든 것을 휩쓰는 거대한 바다의 기운' },
+      '3': { type: 'water', name: '수(水)', label: '계(癸)', icon: '🌧️', color: 'text-blue-500',    bg: 'bg-blue-50',     border: 'border-blue-100',    desc: '대지를 촉촉히 적시는 봄비의 기운' }
+    };
+
+    const TRIGRAM_ELEMENTS = {
+      '111': { type: 'metal', name: '금(金)' },
+      '110': { type: 'metal', name: '금(金)' },
+      '101': { type: 'fire',  name: '화(火)' },
+      '100': { type: 'wood',  name: '목(木)' },
+      '011': { type: 'wood',  name: '목(木)' },
+      '010': { type: 'water', name: '수(水)' },
+      '001': { type: 'earth', name: '토(土)' },
+      '000': { type: 'earth', name: '토(土)' } 
+    };
+
+    const getOhhaengRelation = (userType, hexType) => {
+      if (userType === hexType) return { type: '비화(比和)', desc: '나의 기운과 점괘의 기운이 동일하여 서로 밀어주고 끌어주며 에너지가 배가되는 강력하고 긍정적인 형국입니다. 강한 자신감을 가지고 밀고 나가셔도 좋습니다.' };
+      
+      const rels = {
+        'wood': { generates: 'fire', suppressedBy: 'metal', suppresses: 'earth', generatedBy: 'water' },
+        'fire': { generates: 'earth', suppressedBy: 'water', suppresses: 'metal', generatedBy: 'wood' },
+        'earth': { generates: 'metal', suppressedBy: 'wood', suppresses: 'water', generatedBy: 'fire' },
+        'metal': { generates: 'water', suppressedBy: 'fire', suppresses: 'wood', generatedBy: 'earth' },
+        'water': { generates: 'wood', suppressedBy: 'earth', suppresses: 'fire', generatedBy: 'metal' }
+      };
+      
+      const rel = rels[userType];
+      if (rel.generatedBy === hexType) return { type: '상생(相生) - 대길', desc: '점괘의 기운이 당신을 전폭적으로 돕고 생명력을 불어넣어 주는 대길의 형국입니다. 귀인의 도움을 받거나 상황이 당신에게 몹시 유리하게 흘러갈 것입니다.' };
+      if (rel.generates === hexType) return { type: '상생(相生) - 헌신', desc: '당신의 기운이 상황을 스스로 주도하며 베풀고 이끌어가는 형국입니다. 성과는 좋으나 내 에너지가 몹시 소모될 수 있으니 체력과 멘탈 관리에 신경 써야 합니다.' };
+      if (rel.suppresses === hexType) return { type: '상극(相剋) - 쟁취', desc: '당신이 이 상황의 주도권을 쥐고 완벽하게 통제할 수 있습니다. 다만 뜻을 이루는 과정에서 치열한 마찰과 엄청난 노력이 수반되니 굳은 의지가 필요합니다.' };
+      if (rel.suppressedBy === hexType) return { type: '상극(相剋) - 인내', desc: '현재 점괘의 거대한 기운이 당신을 강하게 억압하고 누르는 형국입니다. 섣부른 행동이나 반항은 큰 화를 부르니, 지금은 철저히 순응하며 때를 기다리는 것이 현명합니다.' };
+      
+      return { type: '알 수 없음', desc: '기운의 흐름을 읽는 중입니다.' };
+    };
+
+    const CATEGORY_PATTERNS = {
+      wealth: /돈|금전|재물|투자|주식|매매|로또|당첨|빚|대출|가격|시세|부동산|아파트|자산|월급|연봉|적금/i,
+      love: /사랑|연애|결혼|이별|재회|남자|여자|친구|동료|사람|인연|소개팅|썸|남편|아내|부부|자녀|가족|부모|갈등|관계/i,
+      career: /취업|이직|퇴사|면접|합격|시험|공부|직장|사업|프로젝트|승진|학교|성적|일|창업|계약|회사|업무|비즈니스|진로/i,
+      health: /건강|병|치료|수술|회복|운동|다이어트|스트레스|몸|질병|병원|컨디션/i
+    };
+
+    const CATEGORY_ADVICE_TEMPLATES = {
+      wealth: { label: '재물 및 투자운', prefix: '재물의 기운과 현재의 흐름을 깊이 통찰해보건대, ', suffix: '금전은 흐르는 물과 같아 머물게 하는 지혜가 필요합니다. 당장의 큰 이익을 좇기보다는 내실을 다지고 안정적인 기반을 마련하는 데 집중하십시오. 때를 기다리며 준비하는 자에게 가장 큰 재물이 주어집니다.' },
+      love: { label: '애정 및 대인관계', prefix: '사람과 사람 사이의 인연과 애정의 궤적을 짚어보건대, ', suffix: '좋은 인연은 억지로 맺어지지 않으며, 깊은 신뢰와 존중 속에서 피어납니다. 상대방의 작은 감정 변화에 귀 기울이고, 나를 먼저 낮추는 부드러운 태도를 잃지 마십시오. 진심은 반드시 닿게 마련입니다.' },
+      career: { label: '직업 및 학업운', prefix: '당신의 업(業)과 사회적 성취를 향한 기운을 풀어보건대, ', suffix: '당장 눈앞에 놓인 장애물은 당신의 그릇을 키우기 위한 하늘의 시험입니다. 원칙과 정도를 지키며 묵묵히 실력을 갈고닦으십시오. 때가 이르면 웅크렸던 만큼 더 높이 도약하여 만인의 인정을 받게 될 것입니다.' },
+      health: { label: '건강 및 컨디션', prefix: '몸과 마음을 다스리는 생명력의 흐름을 짚어보건대, ', suffix: '만병의 근원은 마음의 조급함과 불균형에서 비롯됩니다. 지금은 외부의 활동보다 내면의 평화와 육체의 휴식이 절실히 필요한 때입니다. 자연의 순리에 순응하며, 스스로를 돌보는 시간을 최우선으로 삼으십시오.' },
+      general: { label: '종합적인 조언', prefix: '당신을 둘러싼 우주의 기운과 전반적인 운의 흐름을 살피건대, ', suffix: '세상 만사는 음양의 조화 속에서 끊임없이 변화합니다. 좋을 때일수록 겸손하고, 어려울 때일수록 희망을 잃지 않는 중용의 자세가 필요합니다. 맑은 마음으로 순리를 따르면 결국 길운이 당신과 함께할 것입니다.' }
+    };
+
+    const analyzeQuestion = (question) => {
+      for (const [key, pattern] of Object.entries(CATEGORY_PATTERNS)) {
+        if (pattern.test(question)) return key;
+      }
+      return 'general';
+    };
+
+    const TRIGRAM_IMAGES = {
+      '111': { url: 'https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?auto=format&fit=crop&w=800&q=80', desc: '하늘' },
+      '110': { url: 'https://images.unsplash.com/photo-1506501139174-099022df5260?auto=format&fit=crop&w=800&q=80', desc: '호수' },
+      '101': { url: 'https://images.unsplash.com/photo-1495571242337-0248550dd535?auto=format&fit=crop&w=800&q=80', desc: '태양' },
+      '100': { url: 'https://images.unsplash.com/photo-1532433509204-adb889625686?auto=format&fit=crop&w=800&q=80', desc: '뇌우' },
+      '011': { url: 'https://images.unsplash.com/photo-1511497584788-876760111969?auto=format&fit=crop&w=800&q=80', desc: '바람' },
+      '010': { url: 'https://images.unsplash.com/photo-1558293774-a5e1e07353f0?auto=format&fit=crop&w=800&q=80', desc: '파도' },
+      '001': { url: 'https://images.unsplash.com/photo-1519681393798-38e43269d877?auto=format&fit=crop&w=800&q=80', desc: '산' },
+      '000': { url: 'https://images.unsplash.com/photo-1440615496174-ee7ec28f0daa?auto=format&fit=crop&w=800&q=80', desc: '대지' }
+    };
+
+    const HEXAGRAM_DATA = {
+      '111111': { score: 95, name: '중천건 (乾)', meaning: '하늘 위에 또 하늘이 있는 형상입니다. 우주 만물의 근원이자 아버지, 왕, 리더를 상징하며 가장 강력하고 굳센 양(陽)의 기운이 가득 차 있습니다. 쉼 없이 창조하고 발전하는 생명력을 의미합니다.', advice: '잠룡이 마침내 구름을 타고 승천하여 하늘을 호령하는 대길의 형국입니다. 만물을 창조하고 낳는 굳센 기운이 당신과 함께하고 있으니, 오랫동안 품어왔던 원대한 뜻이 있다면 흔들림 없이 실행에 옮기기에 가장 완벽한 시기입니다. 당신의 능력과 운세가 최고조에 달하여 리더십과 추진력이 크게 빛을 발할 것입니다. 다만, 해가 중천에 뜨면 서서히 기울기 시작하고 강한 나무는 거센 바람에 부러지기 쉬운 법입니다. 양의 기운이 극에 달해 넘치려 하니, 지나친 자만심과 독단적인 결정을 경계해야 합니다. 아랫사람의 말에 귀 기울이고 늘 겸손한 마음가짐으로 주변을 포용한다면, 이 눈부신 길운을 오래도록 곁에 머물게 할 수 있습니다.' },
+      '000000': { score: 90, name: '중지곤 (坤)', meaning: '끝없이 펼쳐진 너른 땅이 겹쳐 있는 형상입니다. 만물을 품어 낳고 기르는 위대한 어머니의 덕을 상징하며, 무한한 포용력과 유순함, 부드러운 수용의 미덕을 의미합니다.', advice: '단단한 대지처럼 조용히 힘을 기르며 만물을 포용해야 할 때입니다. 지금은 앞장서서 나서거나 자신을 강하게 내세우기보다는, 묵묵히 상황의 흐름을 받아들이고 든든한 조력자로서 내실을 다지는 것이 훨씬 유리합니다. 리더가 되어 무리를 이끌려 하기보다, 훌륭한 참모나 따뜻한 후원자가 되어 뒤에서 사람들을 품어줄 때 당신의 가치가 더욱 빛납니다. 만물이 싹트기 위해 겨울 땅속에서 인내하듯, 당장 눈에 띄는 성과가 없다고 조급해하지 마십시오. 넓고 따뜻한 어머니의 마음으로 사람과 상황을 끌어안고 헌신한다면, 결국 모두의 존경을 한 몸에 받으며 크고 값진 결실을 얻게 될 것입니다.' },
+      '100010': { score: 55, name: '수뢰준 (屯)', meaning: '구름과 우레가 가득하지만 아직 비가 내리지 않아 답답한 형상입니다. 만물이 처음 생겨날 때 껍질을 깨고 나오는 산통(産痛)과 험난한 시작을 의미합니다.', advice: '겨울을 이겨낸 새싹이 단단한 흙을 뚫고 나오려 애쓰는 진통의 시기입니다. 모든 위대한 탄생은 뼈를 깎는 고통을 수반하듯, 지금 당신이 겪고 있는 혼란과 장애물은 도약을 위해 반드시 거쳐야 할 필수적인 통과의례입니다. 아직은 외부 환경이 당신을 돕지 않으니 섣부른 확장이나 급격한 변화를 꾀하기엔 무리가 있습니다. 당장의 성과에 연연하거나 좌절하지 말고, 얽힌 실타래를 하나씩 푼다는 심정으로 기반을 단단하게 다지는 데 집중하십시오. 혼자서 모든 짐을 짊어지려 하지 말고 지혜를 나눌 수 있는 믿을 만한 협력자나 스승을 곁에 두는 것이 중요합니다. 인내심을 잃지 않는다면 훗날 튼튼한 거목으로 자라날 것입니다.' },
+      '010001': { score: 45, name: '산수몽 (蒙)', meaning: '높은 산 아래 험한 물이 흐르고 깊은 안개가 자욱한 형상입니다. 앞이 보이지 않는 막막하고 어리석은 상태를 의미하며, 바른 스승과 깨달음이 간절히 필요한 시기입니다.', advice: '눈앞에 짙은 안개가 끼어 나아갈 길의 방향을 잡지 못하고 방황하는 형국입니다. 아직은 경험과 지혜가 부족하여 사물을 있는 그대로 보지 못하고 잘못된 판단을 내리기 쉬운 위태로운 상태입니다. 이런 때일수록 자신의 생각이나 얄팍한 직감에만 의존하는 독단적인 행동은 돌이킬 수 없는 실패를 부를 수 있습니다. 스스로 모른다는 사실을 부끄러워하지 말고, 경험이 풍부한 선배나 통찰력을 지닌 스승, 각 분야의 전문가를 찾아가 겸허한 자세로 가르침과 조언을 구하십시오. 열린 마음으로 타인의 지혜를 스펀지처럼 흡수하고 배우려 노력한다면, 짙게 깔렸던 안개가 서서히 걷히며 당신이 걸어가야 할 명확하고 밝은 길이 눈앞에 드러날 것입니다.' },
+      '111010': { score: 70, name: '수천수 (需)', meaning: '하늘 높은 곳에 구름이 잔뜩 모여 비가 오기를 간절히 기다리는 형상입니다. 나아가려 하나 눈앞에 험난한 강물이 가로막고 있어, 섣불리 움직이지 않고 때를 기다려야 함을 의미합니다.', advice: '만물에 생명을 불어넣을 단비가 내리기 직전, 구름이 무겁게 하늘을 덮고 있는 고요한 대기의 시간입니다. 마음은 당장이라도 앞으로 달려나가고 싶겠지만, 성급하게 서두르거나 무리하게 강을 건너려 발버둥 치면 오히려 물에 빠지는 화를 입을 수 있습니다. 하늘의 뜻이 아직 무르익지 않았으니, 지금은 조급함을 완전히 내려놓고 때가 찾아오기를 여유롭게 기다리는 농부의 지혜가 필요합니다. 이 기다림은 결코 헛된 정체가 아닙니다. 때를 기다리는 동안 맛있는 음식을 먹고 긍정적인 마음으로 몸과 마음의 기력을 충분히 보충하며 훗날을 도모하십시오. 차분하게 내실을 다지며 즐겁게 기다린다면, 머지않아 당신을 돕는 기회의 비가 시원하게 쏟아져 내릴 것입니다.' },
+      '010111': { score: 30, name: '천수송 (訟)', meaning: '하늘의 기운은 위로 솟고 물의 기운은 아래로 흘러, 서로 교감하지 못하고 완전히 어긋난 형상입니다. 의견 대립, 치열한 다툼, 억울한 소송 등 갈등과 분쟁이 끊이지 않음을 의미합니다.', advice: '사람들과의 뜻이 맞지 않아 서로 등지고 서 있는 매우 답답하고 불편한 시기입니다. 당신의 주장과 논리가 제아무리 명백하고 옳다고 하더라도, 그것을 끝까지 밀어붙여 시시비비를 가리려 한다면 결국 깊은 감정의 골이 파이고 피 말리는 소모전으로 이어질 것입니다. 재판이나 다툼에서 겉보기에 이긴다 한들 그 과정에서 입게 될 정신적, 물질적 상처가 승리의 영광보다 훨씬 클 수 있습니다. 자존심을 굽히는 것이 결코 지는 것이 아님을 명심하십시오. 화가 나더라도 한발 뒤로 물러서서 상대방의 입장을 헤아리고, 적절한 선에서 타협하거나 신뢰할 수 있는 중재자를 통해 원만하게 합의점을 찾는 것이 당신을 지키는 가장 지혜로운 대처법입니다.' },
+      '010000': { score: 75, name: '지수사 (師)', meaning: '광활한 땅속 깊은 곳으로 물이 한데 모여 힘차게 흐르는 형상입니다. 한곳으로 모여든 거대한 군중이나 군대를 의미하며, 조직을 일사분란하게 통솔하는 강력한 리더십과 규율을 상징합니다.', advice: '당신이 많은 사람들을 한 방향으로 이끌어야 하는 무거운 중책을 맡게 되거나, 다수의 경쟁자들과 치열하게 맞붙어야 하는 중요한 상황에 직면해 있습니다. 군대를 통솔할 때 가장 필요한 것은 사적인 감정에 흔들리지 않는 대의명분과 공명정대한 규칙입니다. 조직 내의 규율을 엄격하게 세우되, 사람들을 따뜻하게 품어 안는 덕을 겸비해야만 모두가 진심으로 복종하고 따르게 됩니다. 올바른 원칙을 세우고 흔들림 없는 카리스마로 무리를 지휘한다면, 아무리 강한 적이나 어려운 난관 앞에서도 백전백승하는 놀라운 성과를 거두고 사회적으로도 큰 공로를 세울 수 있을 것입니다. 다만 리더의 자리에 오른 만큼 따르는 책임감의 무게도 잊지 마십시오.' },
+      '000010': { score: 85, name: '수지비 (比)', meaning: '물이 땅 위로 골고루 스며들어 서로 하나로 어우러지고 촉촉이 적시는 형상입니다. 사람과 사람이 가식 없이 친하게 지내며 진심으로 서로를 돕는 평화로운 화합과 깊은 친밀함을 의미합니다.', advice: '주변 사람들과의 관계가 봄눈 녹듯 부드러워지고, 마음 맞는 사람들과 협력하여 시너지를 내기에 그 어느 때보다도 훌륭한 길운입니다. 홀로 성벽을 쌓고 고립되지 마시고 적극적으로 마음의 문을 열어 세상과 소통하십시오. 좋은 인맥을 넓히고 기존의 인간관계를 더욱 끈끈하게 다진다면 혼자서는 엄두도 못 낼 일들을 함께 이루어낼 수 있습니다. 하지만 아무나 맹목적으로 믿어서는 곤란합니다. 겉으로만 웃으며 사사로운 이익을 취하려는 사람을 분별해 내는 지혜로운 눈이 필요합니다. 또한 화합의 장이나 모임의 기회가 생겼을 때 주저하다가 늦게 참여하게 되면 좋은 기회를 놓치고 소외될 수 있으니 망설이지 말고 기쁘게 동참하십시오.' },
+      '111011': { score: 65, name: '풍천소축 (小畜)', meaning: '드높은 하늘 위로 바람이 부는 형상입니다. 구름은 끼었으나 아직 비가 오지 않는 상태로, 잠시 멈추어 장애물을 피하고 힘을 조금씩 비축함을 의미합니다.', advice: '아직은 큰 일을 도모하기에 힘이 부족합니다. 억지로 추진하면 막힘이 생기니, 지금은 작은 성공에 만족하며 내실을 다져야 합니다. 부드러운 태도로 주변을 설득하고 기다리면 머지않아 큰 기회가 올 것입니다.' },
+      '110111': { score: 50, name: '천택리 (履)', meaning: '하늘 아래 연못이 있는 형상입니다. 약한 자가 강한 자 뒤를 따르는 모습이며, 호랑이 꼬리를 밟을 만큼 위험하지만 조심하면 물리지는 않는 상태를 의미합니다.', advice: '매우 조심스러운 상황입니다. 윗사람을 대하거나 어려운 일을 처리할 때 예의와 절차를 철저히 지켜야 합니다. 분수에 맞게 행동하고 겸손하게 처신한다면, 아무리 위험한 상황이라도 무사히 넘기고 목적을 달성할 수 있습니다.' },
+      '111000': { score: 98, name: '지천태 (泰)', meaning: '하늘의 기운은 아래로, 땅의 기운은 위로 향하여 서로 교감하고 소통하는 형상입니다. 만물이 화합하고 태평성대를 누리는 가장 길한 상태 중 하나입니다.', advice: '막혀있던 운이 뚫리고 만사가 순조롭게 풀립니다. 어려움은 사라지고 편안함이 찾아오니, 마음먹은 일을 추진하기에 더없이 좋습니다. 다만, 평화로울 때일수록 나태해지지 말고 주위 사람들과 기쁨을 나누며 덕을 베풀어야 복이 지속됩니다.' },
+      '000111': { score: 15, name: '천지비 (否)', meaning: '하늘은 위로만 가고 땅은 아래로만 향하여 서로 만나지 못하는 형상입니다. 소통이 단절되고 꽉 막혀있는 불통과 쇠퇴의 시기를 의미합니다.', advice: '상황이 좋지 않고 주변과의 소통도 어렵습니다. 억지로 뚫으려 하면 오히려 화를 입을 수 있으니, 지금은 나서지 말고 자신의 내면을 닦으며 때를 기다리는 것이 상책입니다. 군자는 어지러운 세상에서 물러나 홀로 고귀함을 지킵니다.' },
+      '101111': { score: 92, name: '천화동인 (同人)', meaning: '하늘 아래 밝은 불이 타오르는 형상입니다. 어두운 곳을 밝히듯, 뜻을 같이하는 사람들이 모여 공적인 목표를 향해 협력하는 모습을 의미합니다.', advice: '혼자서 해결하려 하지 말고 동료나 친구와 힘을 합치십시오. 사적인 이익보다 공적인 목표를 추구할 때 더욱 길합니다. 넓은 세상으로 나아가 사람들과 교류하면 큰 성과를 얻을 수 있으니 대인 관계에 힘쓰십시오.' },
+      '111101': { score: 96, name: '화천대유 (大有)', meaning: '하늘 위에 태양이 높이 떠서 만물을 비추는 형상입니다. 모든 것을 크게 소유하고 풍요로움을 누리는 대길(大吉)의 괘입니다.', advice: '운세가 매우 강성하여 하는 일마다 성과가 크고 재물과 명예가 따릅니다. 그러나 해가 중천에 뜨면 곧 기울기 마련이니, 잘나갈 때일수록 겸손하고 주변에 베풀어야 합니다. 악을 멀리하고 선을 행하면 하늘의 축복이 계속될 것입니다.' },
+      '001000': { score: 99, name: '지산겸 (謙)', meaning: '높은 산이 땅 아래에 겸손하게 자리 잡은 형상입니다. 실력과 덕망이 높으나 자신을 낮추는 겸손함을 의미하며, 주역에서 유일하게 모든 효가 길한 괘입니다.', advice: '벼는 익을수록 고개를 숙입니다. 당신의 능력은 이미 충분하니, 자신을 낮추고 남을 높여주면 존경과 복이 저절로 굴러들어옵니다. 욕심을 버리고 양보하는 미덕을 보이면, 끝내 이루지 못할 일이 없고 흉함도 피해갑니다.' },
+      '000100': { score: 88, name: '뇌지예 (豫)', meaning: '땅 위에서 봄을 알리는 우레가 치는 형상입니다. 만물이 생동하고 기쁨과 즐거움이 가득하며, 미래를 미리 예측하고 준비하는 의미가 있습니다.', advice: '즐겁고 기쁜 일이 생길 운세입니다. 자신감이 넘치고 일이 순조롭게 풀리나, 기쁨에 취해 나태해지거나 방심하면 안 됩니다. 즐거움을 누리되 미래를 위한 준비를 게을리하지 말고, 주변 사람들과 즐거움을 함께 나누십시오.' },
+      '100110': { score: 72, name: '택뢰수 (隨)', meaning: '연못 아래에 우레가 있는 형상입니다. 양이 음의 아래에 있어 자신을 굽히고 남을 따르는 모습으로, 시류에 순응하고 융통성을 발휘함을 의미합니다.', advice: '나의 주장을 고집하기보다 대세의 흐름이나 주변 상황에 맞추어 유연하게 대처해야 합니다. 상황이 변하면 나도 변해야 살길이 열립니다. 남의 의견을 경청하고 순리대로 따르면 힘들이지 않고 목적을 달성할 수 있습니다.' },
+      '011001': { score: 35, name: '산풍고 (蠱)', meaning: '산 아래 바람이 막혀 공기가 탁해진 형상입니다. 그릇 안에 벌레가 생긴 것처럼 내부적으로 부패와 혼란이 발생했음을 의미하며, 이를 고쳐야 함을 뜻합니다.', advice: '오래 묵은 문제들이 터져 나오는 시기입니다. 덮어두려 하지 말고 썩은 환부를 과감하게 도려내는 개혁이 필요합니다. 잘못된 습관이나 관계를 정리하고 새롭게 시작하십시오. 고통이 따르겠지만, 이를 해결하면 전화위복이 됩니다.' },
+      '110000': { score: 82, name: '지택림 (臨)', meaning: '땅 위에 큰 연못이 있는 형상입니다. 군자가 백성에게 임하듯, 지덕을 갖춘 사람이 아랫사람을 너그럽게 포용하고 다스리는 모습입니다.', advice: '운세가 상승 곡선을 타고 있습니다. 적극적으로 세상에 나아가 능력을 펼치고 일을 추진하십시오. 다만 좋은 시절은 영원하지 않으니(8월의 흉), 미리 닥쳐올 어려움을 대비하는 유비무환의 자세가 필요합니다.' },
+      '000011': { score: 78, name: '풍지관 (觀)', meaning: '바람이 땅 위를 불며 지나가는 형상입니다. 높은 곳에서 아래를 내려다보며 상황을 냉철하게 관찰하고, 백성들에게 본보기가 되는 모습을 의미합니다.', advice: '지금은 직접 행동에 나서기보다 전체적인 상황을 면밀히 관찰하고 분석해야 할 때입니다. 섣불리 움직이지 말고 통찰력을 발휘하여 본질을 꿰뚫어 보십시오. 또한 당신의 행동이 타인의 모범이 되도록 처신에 신경 써야 합니다.' },
+      '100101': { score: 48, name: '화뢰서합 (噬嗑)', meaning: '입안에 음식물이 들어있는 형상입니다. 턱을 움직여 음식물을 씹어 부수듯, 방해물이나 장애 요소를 단호하게 제거하고 형벌을 집행하여 질서를 잡는 것을 의미합니다.', advice: '해결해야 할 방해물이나 갈등이 있습니다. 우유부단하게 대처하면 문제가 커지니, 법과 원칙에 따라 공정하고 단호하게 처리해야 합니다. 고통스럽더라도 문제를 확실히 씹어 삼켜야 비로소 소통이 되고 길이 열립니다.' },
+      '101001': { score: 68, name: '산화비 (賁)', meaning: '산 아래 불이 있어 산을 아름답게 비추는 형상입니다. 저녁 노을처럼 겉모습을 화려하고 아름답게 꾸미는 장식과 문명을 의미합니다.', advice: '외면을 가꾸고 이미지를 좋게 만드는 것이 유리한 시기입니다. 문화, 예술, 기획 등의 분야에서 성과가 좋습니다. 다만, 겉치레에만 치중하여 내실을 잃거나 사치하지 않도록 주의해야 합니다. 작은 일에는 길하나 중대사는 신중하십시오.' },
+      '000001': { score: 20, name: '산지박 (剝)', meaning: '높은 산이 비바람에 깎여 무너지는 형상입니다. 음기가 양기를 밀어내어 기초가 흔들리고 쇠퇴하며 박탈당하는 어려운 시기를 의미합니다.', advice: '운세가 쇠락하고 기반이 흔들리고 있습니다. 지금은 무언가를 얻으려 하거나 나아갈 때가 아닙니다. 손해를 보더라도 현상 유지에 힘쓰며 몸을 낮추고 폭풍우가 지나가기를 기다리는 것이 최선입니다. 주변의 감언이설을 조심하십시오.' },
+      '100000': { score: 76, name: '지뢰복 (復)', meaning: '땅 깊은 곳에서 다시 우레(양기)가 싹트는 형상입니다. 긴 겨울이 가고 봄이 오듯, 쇠퇴함이 끝나고 다시 회복하며 돌아오는 것을 의미합니다.', advice: '어둠의 터널을 지나 서서히 희망의 빛이 보이기 시작합니다. 조급해하지 말고 초심으로 돌아가 차근차근 다시 시작하십시오. 과거의 실패를 거울삼아 잘못된 것을 고치고 바른 길로 나아간다면 앞날은 밝습니다.' },
+      '100111': { score: 80, name: '천뢰무망 (無妄)', meaning: '하늘 아래 우레가 쳐서 만물을 깨우는 형상입니다. 사심이나 거짓 없이 자연의 순리대로 따르는 천진난만한 상태를 의미합니다.', advice: '잔머리를 굴리거나 요행을 바라지 말고, 순수한 마음으로 정직하게 행동해야 합니다. 작위적인 노력보다는 흐름에 맡기는 것이 좋습니다. 욕심을 부리거나 억지를 쓰면 오히려 재앙이 닥칠 수 있으니 무위자연의 태도를 가지십시오.' },
+      '111001': { score: 93, name: '산천대축 (大畜)', meaning: '산이 하늘을 품고 있는 형상입니다. 큰 덕과 실력, 재물을 내면에 가득 쌓아두고 기르는 모습으로, 큰 뜻을 펼칠 준비가 되었음을 의미합니다.', advice: '그동안 쌓아온 노력과 실력이 결실을 맺을 때입니다. 당신의 내공은 충분히 깊으니 이제 자신감을 가지고 큰 목표를 향해 나아가도 좋습니다. 인재를 모으고 자원을 활용하여 대업을 도모하기에 아주 좋은 시기입니다.' },
+      '100001': { score: 74, name: '산뢰이 (頤)', meaning: '산 아래 우레가 있고, 모양이 마치 입을 벌린 턱과 같은 형상입니다. 음식으로 몸을 기르고 말로 덕을 기르는 양육과 수양을 의미합니다.', advice: '입으로 들어가는 음식과 입에서 나오는 말을 조심해야 합니다. 건강을 챙기고 언행을 신중히 하여 화를 부르지 않도록 하십시오. 또한 아랫사람을 잘 보살피고 기르는 일에 힘쓰면 덕이 쌓여 길하게 될 것입니다.' },
+      '011110': { score: 42, name: '택풍대과 (大過)', meaning: '연못이 나무를 덮칠 정도로 물이 많은 형상입니다. 기둥이 휘어질 만큼 짐이 무겁고 과도한 상태를 의미하며, 비상한 대책이 필요한 위기 상황입니다.', advice: '감당하기 벅찬 과제를 떠안고 있거나 스트레스가 극에 달한 상태일 수 있습니다. 평범한 방법으로는 해결하기 어려우니 과감하고 결단력 있는 행동이 필요합니다. 무너지지 않도록 중심을 잡고 독립적으로 헤쳐 나가야 합니다.' },
+      '010010': { score: 10, name: '중수감 (坎)', meaning: '물이 겹쳐 있는 형상으로, 험난한 구덩이에 빠진 모습입니다. 첩첩산중의 위기와 고난을 의미하며, 4대 난괘 중 하나입니다.', advice: '살을 에이는 듯한 춥고도 잔인한 인생의 혹독한 한겨울 한가운데에 서 있습니다. 아무리 몸부림쳐도 나아지기는커녕 발버둥 칠수록 오히려 시커먼 진흙탕 속으로 더욱 깊이 빠져드는 몹시 험악한 흉운입니다. 이 무서운 시기에는 기적을 바라며 섣불리 돌파하려 하거나 억지로 발버둥 치는 것은 절대로 피해야 할 가장 치명적인 자충수입니다. 모든 것이 가로막혔을 때는 물이 바위를 만나면 조용히 감싸고 돌아 흐르듯, 거스르지 않는 극도의 유연하고 차분한 마음가짐이 필요합니다. 공포에 질리지 말고 내면에 단단한 믿음과 진실성을 품은 채, 시간이 해결해 주기를 묵묵히 버텨내야 합니다. 이 지독한 고난은 훗날 어떤 시련에도 굴하지 않을 강철 같은 내면을 벼려내기 위한 하늘의 뜨거운 담금질입니다.' },
+      '101101': { score: 87, name: '중화리 (離)', meaning: '타오르는 붉은 불꽃 위에 또 다른 불꽃이 겹쳐 거세게 타오르는 눈부시고 맹렬한 형상입니다. 세상을 비추는 찬란한 밝음, 번뜩이는 지성과 폭발적인 열정을 의미합니다. 하지만 동시에 불은 스스로 탈 수 없고 반드시 장작이나 심지에 기대어 의지해야만 타오르는 본연의 부착성(이별과 의존)의 이중적인 의미도 내포하고 있습니다.', advice: '당신의 뜨거운 열정과 뛰어난 지혜가 겹겹이 불타오르며 세상의 이목을 끌고 눈부신 능력을 아낌없이 발휘하는 지극히 화려한 전성기입니다. 무엇이든 이룰 수 있을 듯 기세가 대단하지만, 스스로 잘났다고 오만하게 독불장군처럼 굴면 땔감이 떨어진 불꽃처럼 한순간에 처참하게 사그라지고 맙니다. 당신의 그 찬란한 불꽃이 영원히 빛나게 하려면 당신의 부족함을 채워줄 훌륭한 스승이나 바르고 곧은 원칙, 그리고 끝까지 믿고 의지할 수 있는 진실한 동료와 강력하게 결속해야 합니다. 불처럼 치솟는 감정을 다스려 중용의 바른길에서 이탈하지만 않는다면, 큰 명예와 성공이 불길처럼 끝없이 뻗어나갈 것입니다.' },
+      '001110': { score: 89, name: '택산함 (咸)', meaning: '고요하고 묵직한 산의 정상에 맑은 연못이 찰랑이며 자리하여, 연못의 수분이 산의 깊은 흙속으로 부드럽게 스며드는 아름다운 형상입니다. 혈기 왕성한 젊은 남녀가 운명처럼 사랑을 느끼듯, 마음과 마음이 깊이 통하고 우주의 기운이 서로 강렬하게 감응하며 끌어당기는 기적 같은 교감을 의미합니다.', advice: '당신의 직감과 감수성이 놀라울 정도로 예민해지고, 타인의 마음에 가닿는 소통의 안테나가 활짝 열리는 감동적인 시기입니다. 특히 연애운과 결혼운에 있어서는 평생의 반려자나 영혼을 뒤흔드는 깊은 인연을 만날 수 있는 최상의 길운입니다. 이 귀한 기운을 제대로 활용하려면, 내 이익을 먼저 따지는 계산적이고 방어적인 태도를 미련 없이 벗어던져야 합니다. 머리가 아닌 가슴으로, 한 치의 거짓 없이 맑고 순수한 진심만을 담아 사람을 대한다면 단단히 닫혀있던 상대방의 철벽 같은 마음도 마법처럼 녹아내리게 됩니다. 거짓 없는 진정성만이 훌륭한 인연과 원하던 완벽한 협력을 끌어내는 유일한 열쇠임을 명심하십시오.' },
+      '011100': { score: 84, name: '뇌풍항 (恒)', meaning: '하늘에선 강렬한 우레가 진동하고 땅에선 거센 바람이 불어와, 두 기운이 완벽한 짝을 이루어 세상 만물을 쉼 없이 변함없이 움직이게 하는 역동적이면서도 지속적인 형상입니다. 마치 평생을 약속한 백년해로 부부의 흔들림 없는 도리처럼, 변치 않는 굳건한 마음과 꾸준하고 한결같은 지속성을 의미합니다.', advice: '바깥세상의 요란한 유혹이나 사소한 이익에 이리저리 흔들리지 말고, 당신이 처음 품었던 그 숭고한 초심을 굳건한 바위처럼 지켜내며 묵묵히 밀고 나아가야 할 때입니다. 지금은 화려하고 낯선 새로운 사업을 무리하게 벌이거나 가보지 않은 샛길로 모험을 떠날 시기가 절대 아닙니다. 평범하고 지루해 보일지라도 지금 당신이 서 있는 자리, 현재 진행 중인 일과 인간관계를 단단히 뿌리내리고 안정적으로 지속하는 것이 백배 천배 유리합니다. 냄비처럼 금세 달아올랐다 식는 변덕은 당신의 운을 다 갉아먹을 것입니다. 한눈팔지 않고 뚝심 있게 한 우물을 성실하게 파내려 간다면, 결국 세상 모두가 당신의 그 거룩한 꾸준함을 인정하고 합당한 큰 보상을 내릴 것입니다.' },
+      '001111': { score: 32, name: '천산둔 (遯)', meaning: '드높은 하늘 아래 웅장한 산이 불끈 솟아올라 하늘을 향해 다가가려 하지만, 고고한 하늘은 먼지 묻은 산을 외면하듯 저 멀리 까마득하게 뒷걸음치며 물러나는 외로운 형상입니다. 이기적이고 속물적인 소인배들이 기세등등하게 득세하고, 뜻이 높고 고결한 군자는 더러운 화를 피하기 위해 깊은 산속으로 자취를 감추어야 하는 서글픈 은둔의 시기를 의미합니다.', advice: '주변의 기운이 극도로 혼탁해져 삿된 무리들이 판을 치니, 지금은 칼을 뽑아 들고 정면으로 맞서 피를 흘리며 싸울 때가 아니라 당신의 소중한 깃털이 다치지 않게 전략적으로 현명하게 후퇴해야 할 몹시 중요한 시점입니다. 불리한 지형과 악조건 속에서도 알량한 자존심 하나만 믿고 억지로 버티거나 분노를 폭발시킨다면 돌이킬 수 없는 치명적인 상처를 입게 될 뿐입니다. 내가 백번 옳다는 허울 좋은 명분마저 과감히 내던지고, 조용하고 신속하게 위험의 소용돌이에서 빠져나와 훗날을 기약하며 몸을 온전히 보전하십시오. 세상이 미쳐 돌아갈 때 홀로 실력을 벼리고 영혼을 닦으며 은인자중하는 것, 그것이 가장 위대한 병법이자 진정한 승자의 처세술입니다.' },
+      '111100': { score: 86, name: '뇌천대장 (大壯)', meaning: '한없이 광활한 하늘의 가장 높은 곳에서 천지를 뒤흔드는 거대한 우레가 우르릉거리며 맹렬하게 내리치는 압도적인 형상입니다. 밝고 굳센 양(陽)의 기운이 하늘을 뚫을 듯 강성하여 기세가 폭발할 듯 등등하고, 주체할 수 없을 만큼 차고 넘치는 막강한 파워와 웅장한 에너지를 의미합니다.', advice: '당신의 내면 깊은 곳에서부터 두려움 없는 자신감이 펄펄 끓어오르고, 당장이라도 세상을 집어삼킬 듯 힘이 용솟음치는 엄청난 기세를 가진 운세입니다. 그러나 넘치는 에너지를 통제하지 못하고 오로지 힘만 믿은 채 무모하게 돌진하거나 안하무인 격으로 날뛴다면, 스스로 파놓은 깊은 함정에 빠져 큰 낭패를 볼 수 있습니다. 질주 본능에 사로잡힌 거친 야생마의 목에 튼튼한 고삐를 채우듯, 끓어오르는 자신의 본능을 차갑고 냉철한 지성으로 완벽하게 제어할 줄 아는 성숙한 지혜가 그 어느 때보다 절실합니다. 당신의 그 막강한 힘을 정도(正道)와 예의범절이라는 올바른 레일 위에 올려놓고 겸손하게 나아간다면, 세상 그 어떤 거대한 장애물도 단숨에 부수고 위대한 업적을 달성할 수 있을 것입니다.' },
+      '000101': { score: 94, name: '화지진 (晉)', meaning: '칠흑같이 어둡고 차가운 대지 위로 찬란하고 따스한 태양이 찬란한 붉은빛을 뿜어내며 서서히 솟아오르는 장엄하고도 벅찬 형상입니다. 오랫동안 짓눌렀던 어둠이 마침내 걷히고 온 세상 만천하에 당신의 밝고 긍정적인 기운이 찬연하게 드러나니, 거침없이 승진하고 전진하며 온 사회의 인정을 듬뿍 받게 되는 눈부신 희망의 시기를 의미합니다.', advice: '마침내 당신을 태운 운명의 수레바퀴가 거침없는 상승 기류에 올랐습니다. 흙 속에 파묻혀 있던 당신의 숨겨진 재능과 진가가 세상의 가장 밝은 곳으로 불려 나와, 윗사람의 전폭적인 신임과 아낌없는 찬사를 동시에 받게 되는 눈부신 시점입니다. 이런 천재일우의 기회 앞에서는 불필요한 주저함이나 패배주의적 두려움을 완전히 쓰레기통에 내버리십시오. 가슴을 펴고 당당한 자신감으로 무장한 채 세상의 중앙 무대를 향해 적극적이고 능동적으로 돌진해야 합니다. 당신 내면의 밝고 다사로운 덕으로 주변의 얼어붙은 마음들마저 따뜻하게 비추며 앞으로 거침없이 나아간다면, 모두의 축복 속에서 당신이 꿈꾸던 것 이상의 거대한 성취와 부를 쟁취하게 될 것입니다.' },
+      '101000': { score: 25, name: '지화명이 (明夷)', meaning: '눈부시게 세상을 비추던 태양이 차가운 땅의 가장 깊숙하고 어두운 속으로 속절없이 추락해 자취를 감춰버린 슬프고도 절망적인 형상입니다. 온통 캄캄한 암흑기이자 피할 수 없는 고난의 시기를 상징하며, 지혜로운 성인이 어리석은 폭군을 피해 자신의 뛰어난 빛(재능)을 철저히 숨기고 바보인 척 엎드려 목숨을 부지하며 때를 기다리는 몹시 비참한 모습을 의미합니다.', advice: '당신을 둘러싼 주변 환경이 한 치 앞도 보이지 않는 먹물처럼 캄캄하고, 아무리 소리쳐도 당신의 진심을 알아주거나 손을 내밀어줄 이가 단 한 명도 없는 참혹한 고립무원의 형국입니다. 이런 시련의 한가운데서 알량한 자존심으로 당신의 뛰어난 재능을 조금이라도 과시하거나 세상에 맞서 바른말을 내뱉는다면, 굶주린 이리 떼 같은 소인배들의 끔찍한 질투와 무자비한 공격을 받아 치명상을 입게 됩니다. 살을 에는 고통이 따르더라도 지금은 지혜의 날을 깊숙이 숨기고 겉으로는 무능하고 어리석은 바보인 척 철저히 위장하며 바짝 엎드려야만 합니다. 가슴속에 타오르는 의지의 불씨는 단단히 움켜쥐되, 겉으로는 누구보다 유순하고 바보스럽게 처신하며 이 끔찍하고 기나긴 밤이 무사히 지나가기만을 숨죽여 기다리십시오.' },
+      '101011': { score: 83, name: '풍화가인 (家人)', meaning: '집안의 따스한 아궁이에서 훈훈한 불이 활활 타오르고, 그 온기가 부드러운 바람을 타고 집안 구석구석을 데워주는 평화롭고 따뜻한 가정의 아름다운 형상입니다. 혈육 간의 조건 없는 사랑과 화목, 가정을 올바르게 다스리는 엄격하지만 자애로운 도리, 그리고 외부의 위협 앞에서도 끄떡없는 끈끈한 내부 조직의 강력한 결속력을 의미합니다.', advice: '지금 당신의 시선과 에너지가 향해야 할 곳은 화려하고 시끄러운 바깥세상이 아니라 바로 가장 가깝고 소중한 당신의 내부 공간입니다. 가정이나 속해 있는 조직 내부의 평화와 단단한 화합을 다지는 일을 삶의 절대적인 최우선 과제로 삼으십시오. 각자가 자신의 몫에 주어진 역할과 본분에 한 치의 거짓 없이 충실하고 서로에게 굳건한 믿음을 내어준다면, 외부에 산적한 어떤 복잡한 문제라도 저절로 봄눈 녹듯 부드럽게 풀려나가게 됩니다. "가화만사성(家和萬事成)", 즉 안에서 새는 바가지를 막고 가족과 같은 내 사람들을 지극정성으로 챙겨 든든한 방패를 구축한다면, 밖에서의 거친 경쟁에서도 흔들림 없는 승리와 찬란한 성공을 거둘 수 있습니다.' },
+      '110101': { score: 28, name: '화택규 (睽)', meaning: '뜨거운 불은 위로만 치솟아 오르려 하고 차가운 연못 물은 아래로만 무겁게 고이려 하여, 둘의 성질이 완전히 극단으로 나뉘어 서로 등 돌리고 멀어지는 서글픈 형상입니다. 사람과 사람 사이의 극심한 반목과 불화, 메울 수 없는 시각 차이와 어긋남을 의미하며, 아주 사소하고 작은 오해 하나가 도화선이 되어 걷잡을 수 없는 격렬한 다툼으로 번지기 쉬운 위태로운 상태입니다.', advice: '함께 길을 걷는 듯하지만 동상이몽을 꾸며, 주변 사람들과 도무지 의견이 좁혀지지 않아 몹시 고독하고 가슴이 터질 듯이 답답한 꽉 막힌 상황입니다. 억지로 상대방의 머리채를 잡아끌어 나와 똑같은 생각으로 통일시키려 윽박지른다면, 남은 감정마저 모두 타버리고 갈등의 불길만 걷잡을 수 없이 커집니다. 나와 다르다는 사실을 틀린 것이라 정죄하지 말고, 그 다름 자체를 자연스러운 현상으로 넓게 인정하십시오. 중대한 목표나 거창한 타협을 시도하기보다는 아주 사소하고 작아서 부딪힐 일 없는 일부터 차근차근 무난하게 처리해 나가는 지혜가 필요합니다. 상대를 바꾸려 하기보다 서로의 극명한 차이점 속에서 아주 작게나마 조화롭게 공존할 수 있는 실낱같은 접점을 인내심을 갖고 모색해야만 합니다.' },
+      '001010': { score: 12, name: '수산건 (蹇)', meaning: '숨을 헐떡이며 험한 산 정상을 간신히 넘었건만 바로 눈앞에 깊고 거친 물보라가 몰아치는 강이 또다시 앞길을 잔인하게 가로막고 있는 형상입니다. 앞으로 단 한 걸음도 나아갈 수 없는 절망감과, 다리를 다친 절름발이처럼 제힘으로는 걷기조차 힘든 최악의 고난과 지독한 삶의 정체를 의미하는 4대 난괘(難卦) 중 하나입니다.', advice: '앞으로 나아갈 길은 폭포수가 막고 뒤로 물러설 길은 깎아지른 절벽이 막은, 진퇴양난의 사면초가 형국입니다. 조바심에 사로잡혀 무모한 오기로 이 거대한 자연의 벽을 맨몸으로 뚫고 나가려 돌진한다면, 필시 뼈가 부러지고 치명상을 입어 영영 일어서지 못하게 될 것입니다. 공포에 휩싸여 발버둥 치기보다는 당장 그 자리에 멈춰 서서 가쁜 숨을 고르고, 지나온 궤적 속에서 자신의 오만함과 실수를 철저하고 뼈아프게 반성하는 자기 성찰의 귀중한 시간으로 삼으십시오. 이 거대한 시련의 장벽은 결코 당신 홀로 깰 수 없습니다. 자존심을 찌그러뜨리고 덕망 높고 지혜로운 귀인이나 당신을 진심으로 아끼는 조력자를 찾아가 머리를 숙이고 눈물로 도움을 청하는 것만이 이 끔찍한 함정을 빠져나갈 유일하고도 현명한 동아줄입니다.' },
+      '010100': { score: 81, name: '뇌수해 (解)', meaning: '메마른 대지를 뒤흔드는 거대한 우레와 함께 만물을 적시는 시원한 소나기가 만나, 지독했던 가뭄이 완벽하게 해갈되는 참으로 상쾌하고 시원한 형상입니다. 꽁꽁 얼어붙었던 두꺼운 얼음이 따스한 볕에 사르르 녹아내리고 단단히 묶였던 지독한 매듭이 마법처럼 툭 풀려나가니, 오랜 근심과 걱정이 씻은 듯 사라지고 막혔던 문제가 속 시원히 해결되는 눈부신 시기입니다.', advice: '길고 캄캄했던 고통의 터널을 마침내 빠져나왔습니다. 오랫동안 당신의 목을 조이고 잠 못 이루게 괴롭히던 지긋지긋한 문제들이 드디어 실타래 풀리듯 마법처럼 해결의 실마리를 찾게 됩니다. 빳빳하게 곤두섰던 신경의 긴장을 부드럽게 풀고, 당신에게 상처를 주었던 과거의 내 실수나 타인의 악의적인 잘못조차도 바다와 같은 관대한 마음으로 모두 용서하고 훌훌 털어버리십시오. 복수나 분노에 에너지를 낭비하지 마십시오. 서두르고 안달하지 않아도 하늘의 순리대로 엉킨 일들이 아주 자연스럽고 평화롭게 술술 풀릴 것이니, 당신은 그저 폭풍우가 지나간 뒤의 평온하고 맑은 마음으로 아름다운 새 출발의 도화지를 준비하기만 하면 됩니다.' },
+      '110001': { score: 60, name: '산택손 (損)', meaning: '높고 거대한 산 아래 고요한 연못이 있어, 산의 흙을 정성껏 깎아내어 연못의 깊은 바닥을 메우거나 연못의 맑은 물이 증발하여 산기슭을 촉촉하게 적시는 형상입니다. 당장 내 손에 쥐어진 것을 기꺼이 덜어내어 남의 부족함을 채워주는 숭고한 자기희생과 조건 없는 헌신, 이타적인 봉사를 의미하는 아름다운 괘입니다.', advice: '내 주머니에서 무언가가 빠져나가는 당장의 모습은 마치 어리석게 밑지는 장사를 하거나 큰 손해를 보는 것처럼 느껴질 수 있습니다. 하지만 이 우주의 신비로운 원리는 내가 진심을 다해 비운 만큼 반드시 더 거대하고 찬란한 축복으로 되채워준다는 것입니다. 알량한 이기심과 눈앞의 계산기를 집어 던지고, 기쁜 마음으로 주변 사람들에게 아낌없이 베풀고 먼저 양보하는 미덕을 실천하십시오. 한 방울의 물이 모여 바다를 이루듯, 당신의 작은 정성과 희생이 차곡차곡 모여 훗날 아무도 꺾을 수 없는 거대한 덕망과 굳건한 신용으로 완성되는 영광스러운 시기입니다. 찰나의 얄팍한 이익에 흔들리지 말고, 영원히 빛날 깊은 신뢰를 마음의 은행에 적금하듯 차곡차곡 쌓는 일에 당신의 온 영혼을 집중해야 합니다.' },
+      '100011': { score: 91, name: '풍뢰익 (益)', meaning: '바람이 불어 우레를 일으키고 우레가 다시 바람의 기세를 키우며, 서로가 서로를 완벽하게 도와 세력을 기하급수적으로 폭발시키는 역동적이고 경이로운 형상입니다. 과거에 덜어냈던 손실이 수십 배의 이익으로 다시 가득 채워지고 운세가 무한정 팽창하며, 개인의 욕심을 넘어 공공의 이익을 위해 헌신하면 하늘의 도움이 더해져 끝없이 발전함을 의미합니다.', advice: '당신의 머리 위로 강한 순풍이 불어오고 등 뒤로는 거대한 파도가 밀어주는, 무엇을 해도 안 될 수가 없는 강력하고 환상적인 운세가 도래했습니다. 오랫동안 구상만 하고 망설이던 일이 있다면, 지금 당장 모든 에너지를 쏟아부어 매우 적극적이고 공격적으로 추진해도 대성공을 거둘 것입니다. 특히 나 혼자 잘 먹고 잘살겠다는 이기적인 잣대를 버리고 타인과 사회 전체에 유익이 되는 숭고한 대의를 품는다면, 보이지 않는 하늘의 막강한 기운마저 가세하여 당신을 영웅으로 만들어 줍니다. 실패에 대한 일말의 모험을 두려워하지 말고, 거친 풍랑을 가르며 넓은 바다로 나아가는 위대한 선장처럼 과감하고 거침없이 도전하십시오. 세상에 베풀고 선을 행할수록 쏟아지는 축복의 크기는 상상을 초월할 만큼 거대하게 증폭되어 돌아올 것입니다.' },
+      '111110': { score: 73, name: '택천쾌 (夬)', meaning: '드넓은 하늘 위로 차오른 연못의 물이 둑을 무너뜨리고 폭포수처럼 무섭게 쏟아져 내리거나, 굳센 다섯 개의 양(君子)이 마지막 남은 단 하나의 음(小人)을 가차 없이 몰아내고 척결하는 단호하고 거침없는 형상입니다. 오랫동안 곪았던 암덩어리를 망설임 없이 도려내듯, 무섭게 결단을 내려 모든 악의 고리를 터트려버리는 강렬한 기세와 혁명을 의미합니다.', advice: '이제 우유부단하게 눈치를 보며 차일피일 미루고 타협할 수 있는 시간은 완전히 끝났습니다. 당신의 영혼을 갉아먹는 해묵은 문제, 악습, 혹은 독이 되는 나쁜 관계의 고리를 단칼에 베어버리는 피 튀기는 결단의 순간이 턱밑까지 닥쳤습니다. 칼을 빼 들었다면 일말의 망설임도 없이 과감하게 썩은 환부를 끊어내고 주변을 철저하게 정리해야만 비로소 살길이 열립니다. 단, 폭발하는 감정에 휘둘려 홧김에 주먹을 휘두르거나 비열한 암수를 쓴다면 뒷감당을 할 수 없는 더 큰 재앙의 부메랑을 맞게 됩니다. 아무도 이의를 제기할 수 없을 만큼 투명하게 공개적이고 티 없이 공명정대한 방법으로, 당당하게 정면에서 문제를 척결해야 훗날 뒤탈이 없고 새로운 질서를 평화롭게 구축할 수 있을 것입니다.' },
+      '011111': { score: 52, name: '천풍구 (姤)', meaning: '높고 푸른 하늘 아래로 유혹적인 한 줄기 바람이 살랑살랑 불어오며 세상 모든 만물과 가볍게 마주치는 오묘한 형상입니다. 아무런 예고도 없이 불쑥 찾아오는 우연한 만남, 특히 겉보기엔 부드럽지만 속으론 몹시 강하고 교활한 음기(陰氣)를 지닌 여성이 뜻밖에 주도권을 틀어쥐는 모습이나 예기치 못한 당혹스러운 사건사고가 발생함을 은밀히 의미합니다.', advice: '당신의 밋밋한 일상에 파문을 일으킬, 전혀 예상조차 하지 못했던 뜻밖의 만남이나 돌발적인 사건이 바람처럼 스며듭니다. 달콤한 향기를 풍기는 새로운 인연이 불쑥 등장하여 당신의 마음을 홀릴 수 있으나, 화려하고 매혹적인 겉모습에 섣불리 현혹되어 이성적인 판단을 잃거나 한순간의 뜨거운 충동에 몸을 내맡기는 가벼운 관계는 절대적으로 피해야만 합니다. 특히 불건전하고 부적절한 밀회나 당신을 교묘히 이용하려는 달콤한 유혹의 덫이 도처에 깔려 있으니 두 눈을 부릅뜨고 경계하십시오. 닥쳐오는 상황의 변화 앞에서는 갈대처럼 부드럽고 유연하게 처신하되, 당신 삶의 조타수 역할인 주도권과 결정권만큼은 결단코 상대에게 빼앗기지 않도록 단단히 중심을 지키고 날 선 경계를 늦추지 말아야 합니다.' },
+      '000110': { score: 85, name: '택지췌 (萃)', meaning: '메말랐던 대지 위로 거대한 연못이 생겨나 생명의 물이 모여드는 풍요로운 형상입니다. 사방팔방에서 재능 있는 사람들과 엄청난 재물, 그리고 세상의 좋은 기운이 뭉게구름처럼 당신 주위로 모여들어 찬란하게 융성해지는 전성기로, 조상에게 정성껏 제사를 지내듯 흩어진 마음을 한곳으로 모으고 집중하는 강력한 응집력을 의미합니다.', advice: '마치 꿀을 발견한 벌떼처럼, 능력 있는 좋은 사람들과 풍성한 재물이 당신을 중심으로 쉴 새 없이 밀려드는 더할 나위 없이 훌륭한 길운입니다. 당신 내면에 숨겨진 강력한 카리스마와 포용력 있는 리더십을 유감없이 발휘하여, 오합지졸로 흩어져 있던 사람들의 마음을 하나로 굳건하게 모으고 조직의 기틀을 거대하게 정비하기에 이보다 더 좋은 때는 없습니다. 다만, 사공이 많으면 배가 산으로 가고 창고에 재물이 넘치면 도둑이 꼬이는 것이 세상 이치인지라, 사람이 많이 모이는 만큼 필연적으로 시끄러운 잡음과 불미스러운 갈등이 터져 나오기 마련입니다. 누구 하나 억울함이 없도록 바위처럼 견고하고 공정한 원칙을 세우고, 가슴을 울리는 진정성 있는 태도로 아랫사람들을 대해야만 이 위대한 내부 결속과 융성함을 오랫동안 다져나갈 수 있습니다.' },
+      '011000': { score: 93, name: '지풍승 (升)', meaning: '어둡고 척박한 땅속 깊은 곳에 묻혀 있던 작은 나무의 씨앗이 껍질을 깨고 싹을 틔워, 마침내 지상 위를 뚫고 끝없이 높은 하늘을 향해 무성하게 자라나는 대견하고 벅찬 형상입니다. 아무런 방해물 없이 순조롭고도 굳건하게 단계적으로 상승하고 무한히 발전하며, 노력한 대가로 사회적 지위가 쑥쑥 오르는 기분 좋은 승진과 영전의 축복을 의미합니다.', advice: '바람 앞에 나부끼던 나약한 묘목이 마침내 비바람을 견뎌내고 숲을 호령하는 거대한 아름드리 거목으로 웅장하게 성장해 나가는 경이로운 시기입니다. 마음만 급하여 단숨에 열 계단을 뛰어오르려 서두르거나 편법을 쓰지 말고, 이마에 흐르는 정직한 땀방울을 믿고 우직하고 성실하게 한 계단씩 단계를 밟아 노력한다면 당신이 염원하던 그 어떤 드높은 목표라도 기필코 찬란하게 달성해 낼 수 있습니다. 이 과정에서 혼자 힘만으로 버거울 때는 덕망 있고 힘 있는 윗사람이나 선배를 찾아가 지혜를 구하고 도움을 청하십시오. 그들의 끌어당기는 힘을 받는다면 날개를 단 듯 더욱 거침없고 수월하게 정상으로 비상할 것입니다. 조급한 불안감을 훌훌 털어버리고, 당신만의 흔들림 없는 묵직한 페이스를 굳건히 유지하며 정상만을 향해 끝없이 정진하십시오.' },
+      '010110': { score: 15, name: '택수곤 (困)', meaning: '가득 차 출렁이던 연못의 물이 바닥의 진흙이 쩍쩍 갈라질 정도로 끔찍하게 말라버린 처참한 형상입니다. 푸르던 나무마저 생명수를 잃고 타들어 가는 메마른 척박한 땅에 홀로 덩그러니 서 있는 것처럼, 가지고 있던 모든 자원과 기운이 무참히 고갈되고 사방이 꽉 막힌 철창에 갇혀있는 듯한 극도의 곤궁함과 가슴 찢어지는 뼈아픈 시련의 시기를 의미합니다.', advice: '생명수조차 모두 말라버린 인생의 지독한 가뭄을 만나 몹시 척박하고 숨 막히게 답답한 최악의 시기입니다. 아무리 눈물겹게 노력해도 작은 성과 하나 나지 않고, 억울함을 토로하려 입을 열어도 당신의 진심을 알아주거나 믿어주는 이가 세상에 단 한 명도 없습니다. 하늘을 원망하고 남을 탓하며 발버둥 칠수록 당신의 귀한 에너지만 바닥나고 상황은 더욱 잔인하게 꼬여만 갑니다. 지금은 얄팍한 변명이나 발버둥으로 빠져나갈 수 있는 가벼운 위기가 아니니, 이것을 나를 시험하는 필연적인 운명이라 묵묵히 받아들이고 바짝 엎드려 견뎌야만 합니다. 입을 굳게 닫고 묵언 수행하는 마음으로 내면의 단단한 내공을 기르는 일에만 전념하는 것 외에는, 이 처절한 곤궁함을 무사히 건널 다른 방법이 없습니다.' },
+      '011010': { score: 77, name: '수풍정 (井)', meaning: '두레박을 단 단단한 나무가 깊고 어두운 땅속으로 들어가 생명의 물을 길어 올리는 생명줄 같은 우물의 숭고한 형상입니다. 좋은 우물물은 아무리 퍼내고 또 퍼내어도 결코 그 깊은 샘이 마르는 법이 없으며 신분 고하를 막론하고 누구나 찾아와 목을 축이고 살리듯, 한결같이 변함없는 거룩한 공로와 대가 없는 이타적인 봉사, 그리고 만물을 먹여 살리는 위대한 양육의 의미를 품고 있습니다.', advice: '마을 사람들을 살리는 우물의 이끼를 걷어내고 맑은 물이 솟도록 정비하듯, 겉으로 드러나는 화려한 활동을 멈추고 고요히 자신의 내면을 깨끗하게 닦으며 녹슨 실력을 새롭게 재정비하고 갈고닦아야 할 숙연한 때입니다. 남들이 알아주지 않아도 서운해하지 말고, 묵묵히 흔들림 없는 푸른 소나무와 같은 마음으로 목마른 타인에게 먼저 조건 없이 베풀고, 당신을 이을 훌륭한 후학이나 인재를 정성껏 길러내는 숭고한 일에 온 영혼의 힘을 쏟으십시오. 당장 내일 아침 눈에 띄는 드라마틱한 커다란 변화나 세속적인 보상이 주어지지 않는다 하더라도 결코 실망하지 마십시오. 변함없는 자리에서 조용히 미소 지으며 크나큰 덕을 태산처럼 쌓아 나간다면, 어느새 당신의 맑고 깊은 영혼의 우물물을 찾아 세상의 수많은 인파가 구름처럼 몰려와 칭송하는 존경받는 스승이 되어 있을 것입니다.' },
+      '101110': { score: 66, name: '택화혁 (革)', meaning: '연못 속에 불이 있어 서로 싸우며 변화를 일으키는 형상입니다. 가죽을 무두질하여 새롭게 하듯, 옛것을 버리고 새것으로 바꾸는 혁명과 개혁을 의미합니다.', advice: '기존의 방식이 한계에 다다랐습니다. 낡은 껍질을 벗어던지고 과감하게 변화를 시도해야 할 때입니다. 타이밍이 중요하니, 철저한 준비 끝에 확신이 섰을 때 단행하십시오. 변화에는 고통이 따르지만 결과는 매우 긍정적일 것입니다.' },
+      '011101': { score: 88, name: '화풍정 (鼎)', meaning: '나무 위에 불을 지펴 음식을 끓이는 솥의 형상입니다. 새로운 솥에 밥을 지어 먹이듯, 안정적인 기반을 구축하고 새로운 인재를 등용하여 쇄신함을 의미합니다.', advice: '새로운 체제나 환경이 안정적으로 자리 잡는 시기입니다. 협력하여 일을 도모하면 큰 성과를 얻습니다. 낡은 것을 버리고 새로운 것을 취하되, 혼자보다는 능력이 뛰어난 사람들과 함께 팀을 이루어 진행하는 것이 성공의 열쇠입니다.' },
+      '100100': { score: 58, name: '중뢰진 (震)', meaning: '우레가 거듭하여 치는 형상입니다. 천둥소리에 온 세상이 놀라 떨지만, 이를 통해 경각심을 갖고 자신을 돌아보게 되는 충격과 분발을 의미합니다.', advice: '갑작스러운 사건이나 충격적인 일이 생겨 놀랄 수 있습니다. 그러나 이는 당신을 깨우기 위한 하늘의 경종입니다. 두려워하거나 당황하지 말고, 침착하게 대처하며 자신을 점검하는 기회로 삼으십시오. 위기 속에 도약의 기회가 숨어 있습니다.' },
+      '001001': { score: 44, name: '중산간 (艮)', meaning: '산 너머 또 산이 가로막고 있는 형상입니다. 더 이상 나아갈 수 없으니 멈추어 서서 등 뒤를 보지 않는, 멈춤과 머무름, 자기 수양을 의미합니다.', advice: '지금은 억지로 나아가려 해도 갈 수 없는 상황입니다. 안달복달하지 말고 현재의 위치에서 멈추어 휴식을 취하십시오. 움직이면 오히려 흉하니, 마음을 비우고 현상을 유지하며 내면을 성찰하는 것이 가장 현명한 처세입니다.' },
+      '001011': { score: 87, name: '풍산점 (漸)', meaning: '산 위에 나무가 뿌리를 내리고 천천히 자라는 형상입니다. 기러기가 질서를 지켜 날아가듯, 급하지 않게 차근차근 단계를 밟아 나아가는 점진적인 발전을 의미합니다.', advice: '속도를 내기보다는 올바른 순서와 절차를 지키는 것이 중요합니다. 서두르면 일을 그르치니, 여유를 가지고 한 단계씩 밟아 올라가십시오. 늦어 보일지라도 탄탄한 기반 위에 성공이 쌓이니, 꾸준함이 결국 승리를 가져다줄 것입니다.' },
+      '110100': { score: 38, name: '뇌택귀매 (歸妹)', meaning: '연못 위에 우레가 있어 물이 요동치는 형상입니다. 누이동생이 시집을 가는 모습이나, 순서가 뒤바뀌고 명분이 약하여 어긋나는 결혼을 의미합니다.', advice: '상황이 불투명하고 순리에 맞지 않는 비정상적인 일들이 당신의 삶 속으로 슬그머니 엮여 들어옵니다. 겉으로 보기에는 화려하고 탐스러워 보일지 몰라도, 그 속을 들여다보면 윤리적 문제투성이거나 주객이 전도되어 썩어있는 경우가 허다합니다. 이럴 때는 순간적인 충동이나 외로움 등 감정에 휩쓸려 내린 성급한 결정이나, 눈앞의 이익에 눈이 멀어 맺은 불공정한 섣부른 계약은 당신의 남은 인생에 돌이킬 수 없는 끔찍한 후회의 그림자를 드리우게 됩니다. 돌다리도 수백 번 두드려보고 건너는 지독한 신중함이 필요하며, 아무리 조건이 달콤하더라도 명분이 서지 않거나 양심에 조금이라도 거리끼는 찝찝한 일이라면 단호하게 뒤돌아서서 거절하는 용기를 내야만 당신의 영혼을 지킬 수 있습니다.' },
+      '101100': { score: 97, name: '뇌화풍 (豐)', meaning: '우레와 불이 만나 빛과 에너지가 가득한 형상입니다. 곡식이 무르익어 풍요롭고 성대한 전성기를 의미하지만, 달도 차면 기운다는 경계심도 포함합니다.', advice: '인생의 전성기라 할 만큼 운세가 왕성하고 성과가 큽니다. 거칠 것이 없으나, 정점에 도달했다는 것은 곧 내려갈 일만 남았다는 뜻이기도 합니다. 풍요로움에 취해 오만해지지 말고, 다가올 쇠퇴기를 대비하여 저축하고 겸손하십시오.' },
+      '001101': { score: 40, name: '화산여행 (旅)', meaning: '산 위에 불이 붙어 이리저리 옮겨 다니는 형상입니다. 정착하지 못하고 떠도는 나그네의 외로움과 고달픔, 불안정함을 의미합니다.', advice: '거처를 자주 옮겨야 하는 이동수가 강하게 들어오거나, 한 직장이나 사람에게 정착하지 못하고 마음이 둥둥 떠다니는 매우 불안정한 시기입니다. 익숙한 내 집을 떠나 낯설고 물선 타향이나 새로운 험악한 환경에서 텃세와 고생을 치러야 할 확률이 매우 높으니, 고집을 앞세우거나 강한 주장을 펴기보다는 주변의 눈치를 살피며 갈대처럼 유연하고 부드럽게 처신해야만 살아남을 수 있습니다. 거창한 목표나 화려한 대박을 노리는 허황된 큰 욕심은 아예 마음속에서 지워버리고, 현재의 이 흔들리고 고달픈 떠돌이 상황 자체를 겸허히 숙명으로 받아들이며 하루하루 소박하고 작은 안전만을 필사적으로 추구하는 것이 당신이 이 위기를 무사히 넘길 수 있는 가장 지혜롭고 현실적인 방법입니다.' },
+      '011011': { score: 64, name: '손위풍 (巽)', meaning: '보이지 않는 부드러운 바람이 거듭하여 쉼 없이 불어오는 형상입니다. 바람이 아무리 작은 틈새라도 소리 없이 집요하게 파고들어 결국 거대한 영향을 미치듯, 강압이 아닌 부드러움으로 스며드는 힘, 혹은 강한 자 앞에서 스스로를 한없이 낮추고 땅에 납작 엎드리는 극도의 겸손과 공손함을 철학적으로 의미합니다.', advice: '상대의 목줄을 쥐고 흔들려는 강압적이고 거친 태도보다는, 부드러운 미소와 버들가지처럼 유연한 처세술이 얼어붙은 상대의 마음을 녹이고 상황을 유리하게 끌고 갈 수 있는 반드시 필요한 묘수가 되는 시기입니다. 당신보다 권력이 강한 윗사람이나 대세의 뜻에 저항하려 하지 말고 흐르는 물처럼 기꺼이 잘 따르고, 뻣뻣한 자존심을 꺾은 채 주변 분위기에 완벽하게 동화되어 스며들듯 행동하십시오. 마음속에 수많은 망설임과 복잡한 계산이 얽혀 과감한 결단력이 크게 부족해지고 이리저리 갈대처럼 흔들릴 수 있습니다. 그러나 상황을 철저히 살핀 후 마침내 당신 내면에서 100퍼센트의 확신이 섰다면, 보이지 않는 바람이 단숨에 천 리를 불어가듯 누구보다 재빠르고 신속하게 실행에 옮겨 빈틈을 파고드는 것이 가장 날카롭고 성공적인 전략입니다.' },
+      '110110': { score: 82, name: '태위택 (兌)', meaning: '맑고 고요한 연못이 두 개나 겹쳐 있어 물결이 서로 어우러지며 반짝이는 몹시 아름답고 기운찬 형상입니다. 좋은 사람들이 한데 모여 서로의 존재만으로도 기뻐하고 즐거워하며 웃음꽃을 피우는 평화로운 모습이며, 부드럽고 진심 어린 말 한마디로 굳게 닫힌 상대의 마음을 무장해제 시켜 부드럽게 설득하고 함께 기쁨을 나누며 화합하는 긍정적인 힘을 의미합니다.', advice: '주변 사람들과의 사이에 막혔던 담장이 허물어지고, 마음을 열어 진심으로 즐겁게 교류하고 속 깊은 대화를 나누기에 이보다 더 좋을 수 없는 화기애애한 최고의 때입니다. 구겨진 미간을 펴고 환하고 밝은 표정과 따뜻하고 부드러운 말씨로 진정성을 담아 사람을 대하면, 평소라면 절대 이룰 수 없었을 당신이 간절히 뜻하는 바조차 상대가 기꺼이 마음을 열어 쉽게 이루어줄 것입니다. 다만, 좋은 분위기에 취해 말만 번지르르하게 앞세우고 정작 뼈 깎는 실천과 행동이 전혀 뒤따르지 않는 속 빈 강정이 되거나, 생각 없이 내뱉은 가벼운 농담 한마디가 와전되어 치명적인 구설수나 악성 루머의 주인공으로 도마 위에 오를 위험이 항상 도사리고 있으니 무리한 언행을 각별히 조심하고 또 조심해야 웃음이 눈물로 바뀌지 않습니다.' },
+      '010011': { score: 79, name: '풍수환 (渙)', meaning: '막힘없이 탁 트인 넓은 수면 위로 거센 바람이 세차게 불어와 고여있던 물결을 흩뜨리고 시원하게 날려버리는 매우 동적이고 시원한 형상입니다. 얼음처럼 꽝꽝 얼어붙어 꽉 막혀있던 상황이 마침내 부드럽게 풀려 흔적 없이 흩어지며, 사방팔방 멀리 뻗어 퍼져나가는 폭발적인 확산과 오랜 갈등의 완벽한 해소, 그리고 지독한 스트레스의 소멸을 통쾌하게 의미합니다.', advice: '당신의 가슴속 깊은 곳에 응어리져 썩어가던 피눈물 나는 문제나 수면장애를 일으키던 끔찍한 근심 걱정이, 어느 날 불어온 한 줄기 시원한 가을바람에 날아가는 낙엽처럼 허무하리만치 흔적도 없이 말끔하게 날아가 해소됩니다. 기나긴 정체의 늪에서 드디어 벗어나 새로운 활력의 돌파구와 눈부신 활로를 힘차게 뚫고 나가게 될 것입니다. 상처받고 갈가리 흩어진 사람들의 민심을 따뜻하게 하나로 다시 모아 전무후무한 새롭고 거대한 프로젝트나 사업을 의욕적으로 시작하기에 완벽한 무대가 펼쳐졌으며, 좁은 우물을 벗어나 넓은 세계를 향해 멀리 장거리 여행을 떠나거나 직장 및 주거지를 크게 이동하여 새로운 삶의 터전을 개척하는 것도 당신의 운을 폭발적으로 상승시키는 매우 길한 행동이니 결코 주저하지 말고 돛을 달아 아주 적극적으로 거세게 움직이십시오.' },
+      '110010': { score: 62, name: '수택절 (節)', meaning: '거대한 연못 위에 찰랑찰랑 물이 한가득 차올라 금방이라도 넘쳐흐르기 직전의 위태롭지만 풍요로운 형상입니다. 물이 제방을 무너뜨리고 넘쳐흘러 홍수가 나지 않도록 단단한 둑으로 안전하게 막아 세우듯이, 스스로 물러설 선과 한계를 명확하게 정하고 철저하게 절제하며 가혹할 정도의 엄격한 규칙을 만들어 지켜나가는 고결한 절도(節度)를 뼈저리게 의미합니다.', advice: '브레이크 없는 마차처럼 당신의 삶을 갉아먹는 무절제한 방종, 위험한 행동, 혹은 과도한 과소비를 당장 멈추고 당장이라도 허리띠를 무섭게 졸라매어 생활의 나사를 바짝 조여야 할 매우 중차대한 때입니다. 타인의 강요가 아닌 스스로 지독하고 엄격한 자기만의 규칙을 피눈물 나게 정하고, 뼈를 깎는 고통이 수반되더라도 이를 한 치의 오차 없이 목숨처럼 지켜내는 결연한 절제의 미덕이 당신의 생명줄과도 같습니다. 의욕이 앞서 도를 넘어선 지나침은 결국 모든 것을 말아먹어 모자람만 훨씬 못하고 치명적인 독배가 되어 돌아오니, 자신의 분수를 뼛속 깊이 깨닫고 지키며, 아무리 욕심이 나더라도 지금 가진 것에 적당한 선에서 기꺼이 만족할 줄 아는 위대한 철학적 지혜만이 당신을 파멸의 늪에서 구하고 빛나는 성공의 길로 부드럽게 안착시킬 것입니다.' },
+      '110011': { score: 90, name: '풍택중부 (中孚)', meaning: '맑은 연못 위로 따스하고 부드러운 바람이 끊임없이 불어와 잔잔한 물결이 쉼 없이 일렁이며 믿음직스러운 파장을 만들어내는 다사롭고 평화로운 형상입니다. 어미 새가 자신의 모든 온기를 다 바쳐 연약한 알을 품어 부화시키듯, 어떤 사심도 가식도 없이 마음속 가장 깊은 심연에서 우러나오는 티 없이 맑고 진실한 맹목적 믿음과 성실함의 극치를 아름답게 의미합니다.', advice: '당신의 지극 정성 어린 진심과 하늘을 감동시킬 만한 한 치의 거짓 없는 믿음이 있다면, 말 못 하는 돼지와 물고기 같은 미천한 미물조차도 깊이 감화되어 눈물을 흘리며 당신을 따르게 됩니다. 눈앞의 알량한 이익을 위해 잔꾀를 부리거나 혓바닥으로 교묘한 술수를 쓰지 말고, 당신의 알몸을 보여주듯 완벽하게 순수하고 진실한 태도로 묵묵히 사람을 대하십시오. 어떤 불순물도 섞이지 않은 성실하고 정직한 마음으로 세상을 마주하며 임한다면, 첩첩산중처럼 당신 앞을 가로막은 아무리 거대한 난관이나 불가능해 보이는 장벽조차도 기적처럼 뚫고 나갈 수 있습니다. 그 찬란한 진정성은 뭇사람의 영혼을 꿰뚫어 당신이 그토록 열망하던 거대한 세력의 협력과 전폭적인 지지를 한 몸에 쓸어 담는 전무후무한 기적을 연출해 낼 것입니다.' },
+      '001100': { score: 46, name: '뇌산소과 (小過)', meaning: '산 위에 우레가 있는 형상입니다. 새가 날개를 펴고 나는 모습처럼 보이며, 큰 일은 불가하고 작은 일은 가능한, 약간 지나친 상태를 의미합니다.', advice: '자신의 깃털과 체력을 과대평가하여 구름 위까지 터무니없이 높이 날아오르려 헛된 욕심을 부리다가는, 거센 돌풍에 휩쓸려 추락하거나 사냥꾼의 예리한 화살에 심장을 정통으로 맞고 비참한 최후를 맞이할 수 있는 몹시 위태로운 운세입니다. 지친 새가 날개를 접고 안전한 숲속 둥지를 찾아 서둘러 고도를 낮추듯, 지금 당장 인생의 목표를 과감하게 두 단계 아래로 대폭 낮추고 바닥에 납작 엎드려 최대한 몸을 사리며 조심스럽고 겸손하게 행동해야만 겨우 생명과 기반을 유지하며 길할 수 있습니다. 수많은 자금이 투입되는 무모한 대규모 사업의 확장이나 일생일대의 중요한 결정은 철저히 뒤로 미루고, 그 대신 내실을 단단히 다지고 당신의 발밑에 떨어진 아주 사소하고 일상적인 자잘한 업무들을 꼼꼼하게 챙기는 데 온 에너지를 100퍼센트 집중하십시오.' },
+      '101010': { score: 94, name: '수화기제 (既濟)', meaning: '물은 아래로 내려가고 불은 위로 올라가 서로 만나 조화를 이룬 형상입니다. 이미 강을 건넜다는 뜻으로, 모든 것이 갖추어지고 완성된 상태를 의미합니다.', advice: '일이 성취되고 안정된 최고의 상태입니다. 그러나 완성은 곧 쇠퇴의 시작이기도 합니다. 현재의 성공에 안주하여 나태해지면 곧바로 혼란이 찾아옵니다. 초심을 잃지 말고 수성(守成)에 힘쓰며, 작은 빈틈도 경계해야 평화를 유지할 수 있습니다.' },
+      '010101': { score: 55, name: '화수미제 (未濟)', meaning: '불은 위로 타오르고 물은 아래로 흘러 서로 만나지 못하는 형상입니다. 아직 강을 건너지 못했다는 뜻으로, 미완성과 새로운 시작의 가능성을 의미합니다.', advice: '아직 일이 마무리되지 않았고 혼란스러운 상태입니다. 하지만 이는 끝이 아니라 새로운 시작을 의미합니다. 지금은 힘이 들더라도 포기하지 말고 끝까지 노력하면 결국에는 이룰 수 있습니다. 마지막 순간까지 긴장을 늦추지 마십시오.' }
+    };
+
+    /* =========================================================================
+       2. 헬퍼 및 UI 그리기 함수들
+       ========================================================================= */
+    const getHexLineHTML = (value, animate) => {
+      return value === 1 
+        ? `<div class="w-full max-w-[200px] h-4 flex justify-between items-center ${animate ? 'hex-line-init hex-line-enter' : ''}">
+             <div class="w-full h-full bg-amber-600/90 rounded-sm shadow-sm backdrop-blur-sm"></div>
+           </div>`
+        : `<div class="w-full max-w-[200px] h-4 flex justify-between items-center ${animate ? 'hex-line-init hex-line-enter' : ''}">
+             <div class="w-[45%] h-full bg-slate-700/90 rounded-sm shadow-sm backdrop-blur-sm"></div>
+             <div class="w-[45%] h-full bg-slate-700/90 rounded-sm shadow-sm backdrop-blur-sm"></div>
+           </div>`;
+    };
+
+    const getSmallHexLineHTML = (value) => {
+      return value === 1
+        ? `<div class="w-full h-3 flex justify-between">
+             <div class="w-full h-full bg-white/90 rounded-[2px] shadow-sm backdrop-blur-sm"></div>
+           </div>`
+        : `<div class="w-full h-3 flex justify-between">
+             <div class="w-[45%] h-full bg-white/90 rounded-[2px] shadow-sm backdrop-blur-sm"></div>
+             <div class="w-[45%] h-full bg-white/90 rounded-[2px] shadow-sm backdrop-blur-sm"></div>
+           </div>`;
+    };
+
+    const getHodoriSVG = (score) => {
+      let mood = 'neutral';
+      if (score >= 80) mood = 'happy';
+      else if (score < 50) mood = 'worried';
+
+      let expressions = '';
+      if (mood === 'happy') {
+        expressions = `<g>
+            <path d="M38 50 Q42 46 46 50" stroke="#1F2937" stroke-width="2.5" fill="none" stroke-linecap="round" />
+            <path d="M54 50 Q58 46 62 50" stroke="#1F2937" stroke-width="2.5" fill="none" stroke-linecap="round" />
+            <path d="M45 68 Q50 75 55 68" stroke="#1F2937" stroke-width="2" fill="#EF4444" />
+            <circle cx="20" cy="70" r="8" fill="#FFF7ED" stroke="#F97316" stroke-width="2" />
+            <circle cx="80" cy="70" r="8" fill="#FFF7ED" stroke="#F97316" stroke-width="2" />
+          </g>`;
+      } else if (mood === 'neutral') {
+        expressions = `<g>
+            <circle cx="42" cy="50" r="3" fill="#1F2937" />
+            <circle cx="58" cy="50" r="3" fill="#1F2937" />
+            <path d="M47 70 Q50 72 53 70" stroke="#1F2937" stroke-width="2" fill="none" />
+             <circle cx="30" cy="80" r="8" fill="#FFF7ED" stroke="#F97316" stroke-width="2" />
+             <circle cx="70" cy="80" r="8" fill="#FFF7ED" stroke="#F97316" stroke-width="2" />
+          </g>`;
+      } else {
+        expressions = `<g>
+            <path d="M38 48 L46 52" stroke="#1F2937" stroke-width="2.5" stroke-linecap="round" />
+            <path d="M38 52 L46 48" stroke="#1F2937" stroke-width="2.5" stroke-linecap="round" />
+            <path d="M54 48 L62 52" stroke="#1F2937" stroke-width="2.5" stroke-linecap="round" />
+            <path d="M54 52 L62 48" stroke="#1F2937" stroke-width="2.5" stroke-linecap="round" />
+            <path d="M46 72 Q50 68 54 72" stroke="#1F2937" stroke-width="2" fill="none" />
+            <path d="M65 40 Q68 45 65 50" stroke="#38BDF8" stroke-width="2" fill="#E0F2FE" />
+             <circle cx="35" cy="65" r="8" fill="#FFF7ED" stroke="#F97316" stroke-width="2" />
+             <circle cx="65" cy="65" r="8" fill="#FFF7ED" stroke="#F97316" stroke-width="2" />
+          </g>`;
+      }
+
+      return `<div class="w-32 h-32 flex-shrink-0 drop-shadow-xl animate-bounce-in-custom">
+          <svg viewBox="0 0 100 100" class="w-full h-full">
+            <path d="M45 20 Q30 5 15 20 T5 40" fill="none" stroke="#FFF" stroke-width="3" stroke-linecap="round" />
+            <circle cx="30" cy="40" r="10" fill="#F97316" />
+            <circle cx="30" cy="40" r="6" fill="#FDBA74" />
+            <circle cx="70" cy="40" r="10" fill="#F97316" />
+            <circle cx="70" cy="40" r="6" fill="#FDBA74" />
+            <circle cx="50" cy="55" r="30" fill="#F97316" />
+            <path d="M50 30 L48 40 L52 40 Z" fill="#1F2937" />
+            <path d="M25 55 L35 53 L35 57 Z" fill="#1F2937" />
+            <path d="M75 55 L65 53 L65 57 Z" fill="#1F2937" />
+            <ellipse cx="50" cy="65" rx="14" ry="10" fill="#FFF7ED" />
+            <path d="M46 62 Q50 66 54 62 L50 68 Z" fill="#1F2937" />
+            <path d="M40 25 L60 25 L58 15 L42 15 Z" fill="#1F2937" />
+            <path d="M35 80 Q50 95 65 80" stroke="#FCD34D" stroke-width="4" fill="none" />
+            <circle cx="50" cy="88" r="6" fill="#FCD34D" stroke="#B45309" stroke-width="1" />
+            ${expressions}
+          </svg>
+        </div>`;
+    };
+
+    /* =========================================================================
+       3. 상태(State) 및 DOM 매핑
+       ========================================================================= */
+    let state = {
+      isMuted: false,
+      user: null,
+      question: '',
+      category: 'general',
+      profile: null
+    };
+
+    const dom = {
+      navLogoBtn: document.getElementById('btn-reset-nav'),
+      userControls: document.getElementById('user-controls-container'),
+      btnMute: document.getElementById('btn-mute'),
+      mainHeader: document.getElementById('main-header'),
+      views: {
+        profile: document.getElementById('view-profile'),
+        intro: document.getElementById('view-intro'),
+        casting: document.getElementById('view-casting'),
+        result: document.getElementById('view-result')
+      },
+      profile: {
+        name: document.getElementById('profile-name'),
+        date: document.getElementById('profile-date'),
+        btnSave: document.getElementById('btn-save-profile'),
+        btnEdit: document.getElementById('btn-edit-profile')
+      },
+      intro: {
+        label: document.getElementById('intro-label'),
+        input: document.getElementById('question-input'),
+        btnStart: document.getElementById('btn-start'),
+        badge: document.getElementById('user-ohhaeng-badge'),
+        badgeIcon: document.getElementById('badge-element-icon'),
+        badgeText: document.getElementById('badge-element-text')
+      },
+      casting: {
+        subtitle: document.getElementById('casting-subtitle'),
+        linesContainer: document.getElementById('casting-lines-container')
+      },
+      result: {
+        bgImage: document.getElementById('result-bg-image'),
+        categoryLabel: document.getElementById('result-category-label'),
+        rank: document.getElementById('result-rank'),
+        hexContainer: document.getElementById('result-hexagram-container'),
+        nameKor: document.getElementById('result-name-kor'),
+        nameHan: document.getElementById('result-name-han'),
+        hodoriContainer: document.getElementById('hodori-container'),
+        question: document.getElementById('result-question'),
+        scoreBar: document.getElementById('result-score-bar'),
+        scoreText: document.getElementById('result-score-text'),
+        meaning: document.getElementById('result-meaning'),
+        prefix: document.getElementById('result-prefix'),
+        advice: document.getElementById('result-advice'),
+        suffix: document.getElementById('result-suffix'),
+        btnReset: document.getElementById('btn-reset'),
+        ohhaengSection: document.getElementById('ohhaeng-analysis-section'),
+        userElement: document.getElementById('analysis-user-element'),
+        hexElement: document.getElementById('analysis-hex-element'),
+        relationDesc: document.getElementById('analysis-relation-desc')
+      },
+      history: {
+        view: document.getElementById('view-history'),
+        list: document.getElementById('history-list'),
+        btnOpen: document.getElementById('btn-history'),
+        btnClose: document.getElementById('btn-close-history')
+      },
+      modal: {
+        wrapper: document.getElementById('custom-modal'),
+        content: document.getElementById('custom-modal-content'),
+        text: document.getElementById('custom-modal-text'),
+        btnClose: document.getElementById('custom-modal-close')
+      }
+    };
+
+    /* =========================================================================
+       4. UI 제어 및 모달 함수
+       ========================================================================= */
+    const playSound = (type) => {
+      if (state.isMuted) return;
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      const ctx = new AudioContext();
+      const now = ctx.currentTime;
+      if (type === 'start') {
+        const osc = ctx.createOscillator(); const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = 'sine'; osc.frequency.setValueAtTime(400, now);
+        osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
+        gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+        osc.start(now); osc.stop(now + 0.2);
+      } else if (type === 'line') {
+        const osc = ctx.createOscillator(); const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = 'square'; osc.frequency.setValueAtTime(800, now);
+        osc.frequency.exponentialRampToValueAtTime(300, now + 0.05);
+        gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+        osc.start(now); osc.stop(now + 0.05);
+      } else if (type === 'result') {
+        const createBell = (freq, duration) => {
+          const osc = ctx.createOscillator(); const gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.type = 'sine'; osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.2, now + 0.1);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+          osc.start(now); osc.stop(now + duration);
+        };
+        createBell(220, 3.0); createBell(330, 2.5); createBell(440, 2.0);
+      }
+    };
+
+    const showModal = (message) => {
+      dom.modal.text.innerText = message;
+      dom.modal.wrapper.classList.remove('hidden');
+      setTimeout(() => {
+        dom.modal.wrapper.classList.remove('opacity-0');
+        dom.modal.content.classList.remove('scale-95');
+      }, 10);
+    };
+
+    const hideModal = () => {
+      dom.modal.wrapper.classList.add('opacity-0');
+      dom.modal.content.classList.add('scale-95');
+      setTimeout(() => { dom.modal.wrapper.classList.add('hidden'); }, 300);
+    };
+
+    let previousView = 'intro';
+    const setView = (viewName) => {
+      Object.values(dom.views).forEach(v => v.classList.add('hidden'));
+      dom.history.view.classList.add('hidden');
+      
+      if (viewName === 'history') {
+        dom.history.view.classList.remove('hidden');
+        dom.navLogoBtn.classList.remove('hidden'); dom.navLogoBtn.classList.add('flex');
+        dom.mainHeader.classList.add('hidden');
+        return;
+      }
+      
+      previousView = viewName;
+      dom.views[viewName].classList.remove('hidden');
+      
+      if (viewName === 'result') {
+        dom.navLogoBtn.classList.remove('hidden'); dom.navLogoBtn.classList.add('flex');
+        dom.mainHeader.classList.add('hidden');
+      } else {
+        dom.navLogoBtn.classList.add('hidden'); dom.navLogoBtn.classList.remove('flex');
+        dom.mainHeader.classList.remove('hidden');
+      }
+    };
+
+    /* =========================================================================
+       5. Firebase 로그인 및 연동 로직
+       ========================================================================= */
+    let auth = null, googleProvider = null, db = null;
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'iching-divination-app';
+
+    try {
+      if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+        const config = typeof __firebase_config === 'string' ? JSON.parse(__firebase_config) : __firebase_config;
+        if (config && Object.keys(config).length > 0) {
+          const app = initializeApp(config);
+          auth = getAuth(app);
+          googleProvider = new GoogleAuthProvider();
+          googleProvider.setCustomParameters({ prompt: 'select_account' });
+          db = getFirestore(app);
+        }
+      }
+    } catch (e) { console.error("Firebase init err:", e); }
+
+    const activateMockLogin = () => {
+      let mockUid = localStorage.getItem('iching_mock_uid');
+      if (!mockUid) { mockUid = 'mock_user_' + Math.floor(Math.random() * 1000000); localStorage.setItem('iching_mock_uid', mockUid); }
+      state.user = { uid: mockUid, displayName: '체험자', photoURL: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix', isAnonymous: false };
+      localStorage.setItem('iching_is_mock_logged_in', 'true');
+      renderUserUI();
+    };
+
+    const handleGoogleLogin = async () => {
+      if (!auth) { showModal("인증 설정을 불러올 수 없어 '체험 모드'로 자동 진행합니다."); activateMockLogin(); return; }
+      try { await signInWithPopup(auth, googleProvider); } catch (error) {
+        showModal("팝업 차단 등의 제약으로 구글 로그인을 진행할 수 없어 '가상 계정'으로 임시 로그인합니다."); activateMockLogin();
+      }
+    };
+
+    const handleLogout = async () => {
+      if (auth && auth.currentUser && (!state.user || !state.user.uid.startsWith('mock'))) { await signOut(auth); }
+      localStorage.removeItem('iching_is_mock_logged_in');
+      state.user = null;
+      renderUserUI();
+    };
+
+    const renderUserUI = () => {
+      if (state.user && !state.user.isAnonymous) {
+        dom.history.btnOpen.classList.remove('hidden');
+        dom.userControls.innerHTML = `
+          <div class="flex items-center gap-2 bg-white/50 p-1 pl-3 pr-1 rounded-full backdrop-blur-sm shadow-sm border border-white/50">
+            <span class="text-xs font-medium text-slate-600 hidden sm:block">반가워요, ${state.user.displayName || '사용자'}님</span>
+            ${state.user.photoURL ? `<img src="${state.user.photoURL}" class="w-8 h-8 rounded-full border border-slate-200" />` : `<div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center"><i data-lucide="user" class="w-4 h-4"></i></div>`}
+            <button id="btn-logout" class="p-1.5 rounded-full hover:bg-white/80 text-slate-400 hover:text-rose-500 transition-colors"><i data-lucide="log-out" class="w-3.5 h-3.5"></i></button>
+          </div>
+        `;
+        document.getElementById('btn-logout').addEventListener('click', handleLogout);
+        if(state.profile) dom.intro.label.innerHTML = `${state.profile.name}님, 무엇이 궁금하신가요?<br/><span class="text-xs text-slate-400 font-normal">질문을 구체적으로 적을수록 답변이 명확해집니다.</span>`;
+      } else {
+        dom.history.btnOpen.classList.remove('hidden'); // 비로그인도 로컬 기록 열람 가능
+        dom.userControls.innerHTML = `
+          <button id="btn-login" class="flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 hover:bg-white text-slate-600 hover:text-slate-900 transition-all shadow-sm backdrop-blur-sm text-xs font-medium border border-white/50">
+            <i data-lucide="log-in" class="w-3.5 h-3.5"></i><span class="hidden sm:inline">구글 로그인</span>
+          </button>
+        `;
+        document.getElementById('btn-login').addEventListener('click', handleGoogleLogin);
+        if(state.profile) dom.intro.label.innerHTML = `${state.profile.name}님, 무엇이 궁금하신가요?<br/><span class="text-xs text-slate-400 font-normal">질문을 구체적으로 적을수록 답변이 명확해집니다.</span>`;
+      }
+      lucide.createIcons();
+    };
+
+    async function initAuth() {
+      if (localStorage.getItem('iching_is_mock_logged_in') === 'true') { activateMockLogin(); return; }
+      if (auth) {
+        try {
+          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token);
+          else await signInAnonymously(auth);
+        } catch (e) { console.error("Auth init failed", e); }
+        onAuthStateChanged(auth, (currentUser) => { if(!state.user || !state.user.uid.startsWith('mock')) { state.user = currentUser; renderUserUI(); }});
+      } else { renderUserUI(); }
+    }
+
+    /* =========================================================================
+       6. 점괘 기록 저장 및 히스토리 조회
+       ========================================================================= */
+    const saveDivinationLog = async (question, category, hexName, score) => {
+      const logData = { id: Date.now().toString(), question: question, category: category, hexagram_name: hexName, score: score, timestamp: Date.now() };
+      const localLogs = JSON.parse(localStorage.getItem('iching_history') || '[]');
+      localLogs.push(logData); localStorage.setItem('iching_history', JSON.stringify(localLogs));
+
+      if (auth && auth.currentUser && db && state.user && !state.user.uid.startsWith('mock')) {
+        try {
+          const userId = auth.currentUser.uid;
+          const logsRef = collection(db, 'artifacts', appId, 'users', userId, 'divination_logs');
+          await addDoc(logsRef, { ...logData, timestamp: serverTimestamp() });
+        } catch (e) { console.error(e); }
+      }
+    };
+
+    const loadHistory = async () => {
+      dom.history.list.innerHTML = `<div class="text-center text-slate-400 py-10 text-sm animate-pulse">점괘 기록을 불러오는 중...</div>`;
+      setView('history'); lucide.createIcons();
+
+      let logs = JSON.parse(localStorage.getItem('iching_history') || '[]');
+      if (auth && auth.currentUser && db && state.user && !state.user.uid.startsWith('mock')) {
+        try {
+          const snapshot = await getDocs(collection(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'divination_logs'));
+          snapshot.forEach(doc => {
+            const data = doc.data(); const dbTime = data.timestamp ? data.timestamp.toMillis() : 0;
+            if (!logs.some(log => log.id === doc.id || Math.abs(log.timestamp - dbTime) < 5000)) {
+              logs.push({ id: doc.id, ...data, timestamp: dbTime || Date.now() });
+            }
+          });
+        } catch (e) { console.error(e); }
+      }
+      logs.sort((a, b) => b.timestamp - a.timestamp);
+      if (logs.length === 0) {
+        dom.history.list.innerHTML = `<div class="text-center text-slate-400 py-10 text-sm">아직 점괘 기록이 없습니다.</div>`; return;
+      }
+      const catMap = { wealth: '재물운', love: '애정운', career: '직장운', health: '건강운', general: '종합운' };
+      dom.history.list.innerHTML = logs.map(log => {
+        const date = new Date(log.timestamp).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        return `<div class="bg-slate-50 border border-slate-100 p-4 rounded-xl flex flex-col gap-2 relative transition-all hover:shadow-md">
+            <div class="flex justify-between items-start">
+              <span class="text-[10px] font-bold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">${catMap[log.category] || '종합운'}</span>
+              <span class="text-xs text-slate-400">${date}</span>
+            </div>
+            <p class="text-sm text-slate-700 font-medium">"${log.question}"</p>
+            <div class="flex justify-between items-end mt-1">
+              <span class="text-lg font-bold text-slate-900">${log.hexagram_name}</span>
+              <span class="text-xs font-bold text-slate-500">지수 <span class="text-amber-500">${log.score}점</span></span>
+            </div>
+          </div>`;
+      }).join('');
+    };
+
+    /* =========================================================================
+       7. 이벤트 리스너 할당 및 메인 로직 
+       ========================================================================= */
+    dom.modal.btnClose.addEventListener('click', hideModal);
+    dom.btnMute.addEventListener('click', () => { state.isMuted = !state.isMuted; dom.btnMute.innerHTML = `<i data-lucide="${state.isMuted ? 'volume-x' : 'volume-2'}" class="w-5 h-5"></i>`; lucide.createIcons(); });
+    dom.intro.input.addEventListener('input', (e) => { state.question = e.target.value; });
+    dom.navLogoBtn.addEventListener('click', () => { state.question = ''; dom.intro.input.value = ''; setView('intro'); });
+    dom.result.btnReset.addEventListener('click', () => { state.question = ''; dom.intro.input.value = ''; setView('intro'); });
+    dom.history.btnOpen.addEventListener('click', loadHistory);
+    dom.history.btnClose.addEventListener('click', () => setView(previousView));
+    dom.profile.btnEdit.addEventListener('click', () => setView('profile'));
+
+    // 성별 버튼
+    const genderBtns = document.querySelectorAll('.gender-btn');
+    let selectedGender = 'M';
+    genderBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        genderBtns.forEach(b => {
+          b.classList.remove('bg-amber-100', 'border-amber-400', 'text-amber-800', 'font-bold');
+          b.classList.add('bg-slate-50', 'border-slate-200', 'text-slate-600');
+        });
+        e.target.classList.remove('bg-slate-50', 'border-slate-200', 'text-slate-600');
+        e.target.classList.add('bg-amber-100', 'border-amber-400', 'text-amber-800', 'font-bold');
+        selectedGender = e.target.dataset.value;
+      });
+    });
+
+    // 사주 프로필 저장
+    dom.profile.btnSave.addEventListener('click', () => {
+      const name = dom.profile.name.value.trim() || '사용자';
+      const birthDate = dom.profile.date.value;
+
+      if (!birthDate) { showModal('태어난 생년월일을 정확히 선택해주세요.'); return; }
+
+      const birthYear = new Date(birthDate).getFullYear();
+      const lastDigit = birthYear.toString().slice(-1);
+      const elementData = YEAR_STEM_ELEMENTS[lastDigit];
+
+      const profileData = { name, gender: selectedGender, birthDate, birthYear, element: elementData };
+      localStorage.setItem('iching_saju_profile', JSON.stringify(profileData));
+      state.profile = profileData;
+      
+      dom.intro.badgeIcon.innerText = elementData.icon;
+      dom.intro.badgeText.innerText = `${elementData.name} - ${elementData.desc}`;
+      dom.intro.badgeText.className = `text-xs font-bold ${elementData.color}`;
+      dom.intro.badge.className = `mb-6 px-4 py-2 rounded-full shadow-sm border flex items-center gap-2 animate-fade-in-bottom ${elementData.bg} ${elementData.border}`;
+      dom.intro.badge.classList.remove('hidden');
+
+      showModal(`분석 완료!\n\n${name}님은 [${elementData.name}]의 기운을 강하게 타고나셨습니다.\n이제 주역점과 오행을 결합한 풀이를 시작합니다.`);
+      
+      dom.intro.label.innerHTML = `${name}님, 무엇이 궁금하신가요?<br/><span class="text-xs text-slate-400 font-normal">질문을 구체적으로 적을수록 답변이 명확해집니다.</span>`;
+      dom.profile.btnEdit.classList.remove('hidden');
+      setView('intro');
+    });
+
+    // 점치기 시작
+    dom.intro.btnStart.addEventListener('click', () => {
+      if (!state.question.trim()) { showModal("마음속에 품은 질문을 입력해주세요."); return; }
+      playSound('start');
+      state.category = analyzeQuestion(state.question);
+      dom.casting.subtitle.innerText = `${CATEGORY_ADVICE_TEMPLATES[state.category].label}에 대한 괘를 짓고 있습니다...`;
+      
+      dom.casting.linesContainer.innerHTML = '';
+      for (let i = 0; i < 6; i++) { dom.casting.linesContainer.innerHTML += `<div class="w-full max-w-[200px] h-4 bg-transparent opacity-0"></div>`; }
+      setView('casting');
+
+      let currentHexagram = [];
+      for (let i = 0; i < 6; i++) {
+        setTimeout(() => {
+          currentHexagram.push(Math.random() > 0.5 ? 1 : 0);
+          let newHtml = '';
+          for (let j = 5; j >= 0; j--) {
+            if (j >= currentHexagram.length) { newHtml += `<div class="w-full max-w-[200px] h-4 opacity-0"></div>`; } 
+            else { newHtml += getHexLineHTML(currentHexagram[j], j === currentHexagram.length - 1); }
+          }
+          dom.casting.linesContainer.innerHTML = newHtml; playSound('line');
+        }, 800 * (i + 1));
+      }
+
+      setTimeout(() => {
+        const hexKey = currentHexagram.join('');
+        const data = HEXAGRAM_DATA[hexKey] || { name: '미지 (Unknown)', meaning: '데이터를 찾을 수 없습니다.', advice: '오류가 발생했습니다.', score: 50 };
+        
+        const lowerTrigramKey = currentHexagram.slice(0, 3).join('');
+        const upperTrigramKey = currentHexagram.slice(3, 6).join('');
+        const bgData = TRIGRAM_IMAGES[upperTrigramKey] || TRIGRAM_IMAGES['111'];
+        const hexUpperElement = TRIGRAM_ELEMENTS[upperTrigramKey].type;
+
+        let finalScore = data.score;
+        if (state.category === 'wealth' && data.name.includes('대유')) finalScore += 5;
+        if (state.category === 'wealth' && data.name.includes('손')) finalScore -= 5;
+        if (state.category === 'love' && data.name.includes('함')) finalScore += 5;
+        finalScore = Math.min(100, Math.max(0, finalScore));
+
+        saveDivinationLog(state.question, state.category, data.name, finalScore);
+        
+        dom.result.bgImage.src = bgData.url; dom.result.bgImage.classList.remove('hidden');
+        dom.result.categoryLabel.innerText = `${CATEGORY_ADVICE_TEMPLATES[state.category].label} 기준`;
+        dom.result.rank.innerText = `상위 ${Math.floor(64 - (finalScore / 100 * 63))}위`;
+        
+        let hexHtml = '';
+        for (let j = 5; j >= 0; j--) { hexHtml += getSmallHexLineHTML(currentHexagram[j]); }
+        dom.result.hexContainer.innerHTML = hexHtml;
+        
+        const nameParts = data.name.split(' ');
+        dom.result.nameKor.innerText = nameParts[0]; dom.result.nameHan.innerText = nameParts[1] || '';
+        dom.result.hodoriContainer.innerHTML = getHodoriSVG(finalScore);
+        dom.result.question.innerText = `"${state.question}"`;
+        
+        dom.result.scoreBar.className = `h-full rounded-full transition-all duration-1000 ease-out w-0 ${finalScore >= 80 ? 'bg-emerald-500' : finalScore >= 50 ? 'bg-amber-400' : 'bg-rose-500'}`;
+        dom.result.scoreText.innerText = `${finalScore}점`;
+        setTimeout(() => { dom.result.scoreBar.style.width = `${finalScore}%`; }, 100);
+
+        // 오행 분석 렌더링
+        if (state.profile) {
+          const relation = getOhhaengRelation(state.profile.element.type, hexUpperElement);
+          const hexElData = Object.values(YEAR_STEM_ELEMENTS).find(el => el.type === hexUpperElement);
+          
+          dom.result.userElement.innerHTML = `${state.profile.element.icon} ${state.profile.element.name}`;
+          dom.result.userElement.className = `text-sm font-bold block ${state.profile.element.color}`;
+          
+          dom.result.hexElement.innerHTML = `${hexElData.icon} ${hexElData.name}`;
+          dom.result.hexElement.className = `text-sm font-bold block ${hexElData.color}`;
+          
+          dom.result.relationDesc.innerHTML = `<strong class="text-indigo-600 block mb-1">[${relation.type}]</strong> ${relation.desc}`;
+          dom.result.ohhaengSection.classList.remove('hidden');
+        } else {
+          dom.result.ohhaengSection.classList.add('hidden');
+        }
+
+        dom.result.meaning.innerText = data.meaning;
+        dom.result.prefix.innerText = CATEGORY_ADVICE_TEMPLATES[state.category].prefix;
+        dom.result.advice.innerText = data.advice;
+        dom.result.suffix.innerText = CATEGORY_ADVICE_TEMPLATES[state.category].suffix;
+
+        setView('result'); playSound('result'); lucide.createIcons();
+      }, 800 * 7);
+    });
+
+    // --- 앱 부트스트랩 ---
+    lucide.createIcons();
+    initAuth();
+    
+    // 저장된 사주 프로필 체크
+    const savedProfile = localStorage.getItem('iching_saju_profile');
+    if (savedProfile) {
+      state.profile = JSON.parse(savedProfile);
+      dom.profile.btnEdit.classList.remove('hidden');
+      
+      const el = state.profile.element;
+      dom.intro.badgeIcon.innerText = el.icon;
+      dom.intro.badgeText.innerText = `${el.name} - ${el.desc}`;
+      dom.intro.badgeText.className = `text-xs font-bold ${el.color}`;
+      dom.intro.badge.className = `mb-6 px-4 py-2 rounded-full shadow-sm border flex items-center gap-2 ${el.bg} ${el.border}`;
+      dom.intro.badge.classList.remove('hidden');
+      
+      if (dom.intro.label.innerHTML.includes("무엇이")) {
+        dom.intro.label.innerHTML = `${state.profile.name}님, 무엇이 궁금하신가요?<br/><span class="text-xs text-slate-400 font-normal">질문을 구체적으로 적을수록 답변이 명확해집니다.</span>`;
+      }
+      setView('intro');
+    } else {
+      setView('profile');
+    }
+
+  </script>
+</body>
+</html>
