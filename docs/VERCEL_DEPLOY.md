@@ -26,8 +26,19 @@ Required:
 DATABASE_URL
 AUTH_SECRET
 AUTH_URL
-OPENAI_API_KEY
-OPENAI_MODEL
+```
+
+AI Configuration (Choose your provider):
+
+```text
+# Provider Selection (google, anthropic, openai)
+AI_PROVIDER=google
+AI_MODEL=gemini-1.5-flash
+
+# API Keys
+GOOGLE_GENERATIVE_AI_API_KEY=your_key
+ANTHROPIC_API_KEY=your_key
+OPENAI_API_KEY=your_key
 ```
 
 Optional for Google login:
@@ -41,7 +52,6 @@ For production:
 
 ```text
 AUTH_URL=https://YOUR_PROJECT.vercel.app
-OPENAI_MODEL=gpt-5.2
 ```
 
 ## 4. Verify
