@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { createDivinationInterpretation } from "@/lib/ai/openai";
+import { createDivinationInterpretation } from "@/lib/ai";
 import { buildDivinationPrompt } from "@/lib/ai/prompt";
 import { analyzeQuestion } from "@/lib/divination/categories";
 import { calculateRank, castHexagramLines, linesToCode } from "@/lib/divination/engine";

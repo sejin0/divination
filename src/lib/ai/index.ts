@@ -1,4 +1,8 @@
-import OpenAI from "openai";
+import { google } from "@ai-sdk/google";
+import { anthropic } from "@ai-sdk/anthropic";
+import { openai } from "@ai-sdk/openai";
+import { generateObject } from "ai";
+import { z } from "zod";
 
 export interface DivinationAiResult {
   model: string;
@@ -12,66 +16,78 @@ export interface DivinationAiResult {
   outputTokens: number;
 }
 
-export async function createDivinationInterpretation(prompt: string): Promise<DivinationAiResult> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  const model = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
+const divinationSchema = z.object({
+  summary: z.string().describe("한 줄 핵심 요약 (20자 이내)"),
+  prefix: z.string().describe("현재 상황과 흐름 분석 (2~3문장, ~건대/~건데 어미 사용)"),
+  advice: z.string().describe("주역 괘 기반 상세 풀이 (3~5문장, 구체적 조언)"),
+  suffix: z.string().describe("실천 조언 한 가지 (1~2문장, 핵심 행동 지침)"),
+  score: z.number().int().describe("괘 점수 그대로 사용 (정수)"),
+});
 
-  // API 키가 없으면 구조화된 목업 데이터 반환
-  if (!apiKey) {
-    return getMockResult(model, prompt);
+function getModel() {
+  const provider = process.env.AI_PROVIDER; // 'google', 'anthropic', 'openai'
+  const modelId = process.env.AI_MODEL;
+
+  // 1. Google Gemini
+  if (provider === "google" || (!provider && process.env.GOOGLE_GENERATIVE_AI_API_KEY)) {
+    return {
+      instance: google(modelId ?? "gemini-1.5-flash"),
+      name: modelId ?? "gemini-1.5-flash",
+    };
+  }
+
+  // 2. Anthropic Claude
+  if (provider === "anthropic" || (!provider && process.env.ANTHROPIC_API_KEY)) {
+    return {
+      instance: anthropic(modelId ?? "claude-3-5-sonnet-20240620"),
+      name: modelId ?? "claude-3-5-sonnet-20240620",
+    };
+  }
+
+  // 3. OpenAI
+  if (provider === "openai" || (!provider && process.env.OPENAI_API_KEY)) {
+    return {
+      instance: openai(modelId ?? process.env.OPENAI_MODEL ?? "gpt-4o-mini"),
+      name: modelId ?? process.env.OPENAI_MODEL ?? "gpt-4o-mini",
+    };
+  }
+
+  return null;
+}
+
+export async function createDivinationInterpretation(prompt: string): Promise<DivinationAiResult> {
+  const modelInfo = getModel();
+
+  if (!modelInfo) {
+    return getMockResult("mock-model", prompt);
   }
 
   try {
-    const client = new OpenAI({ apiKey });
-    const response = await client.chat.completions.create({
-      model,
-      max_tokens: 1000,
-      response_format: { type: "json_object" },
-      messages: [
-        {
-          role: "system",
-          content:
-            "당신은 주역 상담 전문가입니다. 반드시 아래 JSON 형식으로만 응답하세요.\n" +
-            "{\n" +
-            '  "summary": "한 줄 핵심 요약 (20자 이내)",\n' +
-            '  "prefix": "현재 상황과 흐름 분석 (2~3문장, ~건대/~건데 어미 사용)",\n' +
-            '  "advice": "주역 괘 기반 상세 풀이 (3~5문장, 구체적 조언)",\n' +
-            '  "suffix": "실천 조언 한 가지 (1~2문장, 핵심 행동 지침)",\n' +
-            '  "score": 괘 점수 그대로 사용 (정수)\n' +
-            "}\n" +
-            "의학·법률·투자 수익을 보장하지 말고, 상담과 통찰 중심으로 작성하세요."
-        },
-        { role: "user", content: prompt }
-      ]
+    const { object, usage } = await generateObject({
+      model: modelInfo.instance,
+      schema: divinationSchema,
+      system: "당신은 주역 상담 전문가입니다. 의학·법률·투자 수익을 보장하지 말고, 상담과 통찰 중심으로 작성하세요.",
+      prompt: prompt,
     });
 
-    const raw = response.choices[0]?.message?.content ?? "{}";
-    const parsed = JSON.parse(raw.replace(/```json|```/g, "").trim()) as {
-      summary?: string;
-      prefix?: string;
-      advice?: string;
-      suffix?: string;
-      score?: number;
-    };
-
     return {
-      model,
-      summary: parsed.summary ?? "주역 해석 완료",
-      result: [parsed.prefix, parsed.advice, parsed.suffix].filter(Boolean).join("\n\n"),
-      prefix: parsed.prefix ?? "",
-      advice: parsed.advice ?? "",
-      suffix: parsed.suffix ?? "",
-      score: typeof parsed.score === "number" ? parsed.score : 50,
-      inputTokens: response.usage?.prompt_tokens ?? 0,
-      outputTokens: response.usage?.completion_tokens ?? 0
+      model: modelInfo.name,
+      summary: object.summary,
+      result: [object.prefix, object.advice, object.suffix].join("\n\n"),
+      prefix: object.prefix,
+      advice: object.advice,
+      suffix: object.suffix,
+      score: object.score,
+      inputTokens: usage.promptTokens,
+      outputTokens: usage.completionTokens,
     };
-  } catch {
-    return getMockResult(model, prompt);
+  } catch (error) {
+    console.error("AI Generation Error:", error);
+    return getMockResult(modelInfo.name, prompt);
   }
 }
 
 function getMockResult(model: string, prompt: string): DivinationAiResult {
-  // prompt에서 카테고리/괘 이름 추출해서 좀 더 자연스러운 목업 생성
   const isLove = prompt.includes("애정") || prompt.includes("사랑") || prompt.includes("연애");
   const isWealth = prompt.includes("재물") || prompt.includes("투자") || prompt.includes("사업");
   const isCareer = prompt.includes("직업") || prompt.includes("취업") || prompt.includes("학업");
@@ -112,6 +128,6 @@ function getMockResult(model: string, prompt: string): DivinationAiResult {
     suffix,
     score: 55,
     inputTokens: 0,
-    outputTokens: 0
+    outputTokens: 0,
   };
 }
