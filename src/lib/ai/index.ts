@@ -31,8 +31,8 @@ function getModel() {
   // 1. Google Gemini
   if (provider === "google" || (!provider && process.env.GOOGLE_GENERATIVE_AI_API_KEY)) {
     return {
-      instance: google(modelId ?? "gemini-1.5-flash"),
-      name: modelId ?? "gemini-1.5-flash",
+      instance: google(modelId ?? "gemini-2.5-flash"),
+      name: modelId ?? "gemini-2.5-flash",
     };
   }
 
