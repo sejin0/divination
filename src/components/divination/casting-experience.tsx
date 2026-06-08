@@ -63,6 +63,7 @@ export function CastingExperience() {
   const [isMuted, setIsMuted] = useState(false);
   const [selectedGender, setSelectedGender] = useState<"M" | "F">("M");
   const [profile, setProfile] = useState<{ name: string; element: (typeof YEAR_STEM_ELEMENTS)[string] } | null>(null);
+  const [birthDate, setBirthDate] = useState("");
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   /* 저장된 프로필 복원 */
@@ -72,6 +73,9 @@ export function CastingExperience() {
       if (saved) {
         const p = JSON.parse(saved);
         setProfile(p);
+        if (p.birthDate) {
+          setBirthDate(p.birthDate);
+        }
         setView("intro");
       }
     } catch { /* ignore */ }
@@ -192,8 +196,25 @@ export function CastingExperience() {
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">생년월일</label>
-                <input type="date" name="profile-date"
-                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 cursor-pointer" />
+                <input type="text" name="profile-date"
+                  placeholder="YYYY-MM-DD (예: 1995-12-31)"
+                  maxLength={10}
+                  value={birthDate}
+                  onChange={(e) => {
+                    let val = e.target.value.replace(/\D/g, "");
+                    if (val.length > 8) {
+                      val = val.substring(0, 8);
+                    }
+                    let formatted = val;
+                    if (val.length > 4) {
+                      formatted = `${val.slice(0, 4)}-${val.slice(4)}`;
+                    }
+                    if (val.length > 6) {
+                      formatted = `${val.slice(0, 4)}-${val.slice(4, 6)}-\D*${val.slice(6)}`.replace(/-\D*/g, "-");
+                    }
+                    setBirthDate(formatted);
+                  }}
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500" />
               </div>
               <button type="submit" className="w-full mt-4 bg-slate-900 hover:bg-slate-800 text-white font-medium py-3.5 rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-slate-900/20">
                 오행 기운 분석하기
