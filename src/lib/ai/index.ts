@@ -78,8 +78,8 @@ export async function createDivinationInterpretation(prompt: string): Promise<Di
       advice: object.advice,
       suffix: object.suffix,
       score: object.score,
-      inputTokens: usage.promptTokens,
-      outputTokens: usage.completionTokens,
+      inputTokens: usage.inputTokens ?? 0,
+      outputTokens: usage.outputTokens ?? 0,
     };
   } catch (error) {
     console.error("AI Generation Error:", error);
